@@ -37,11 +37,11 @@ graph TD
 
 ## 📸 Screenshots & Demo
 
-> **Note:** Please create a `screenshots` folder in the root of your project and save the 3 images you just showed me into that folder with the names `dashboard.jpg`, `food_log.jpg`, and `coach_chat.jpg` so they appear correctly below!
+> **Note:** Please create a `screenshots` folder in the root of your project and save the 3 images you just showed me into that folder with the names `dashboard.jpeg`, `food_log.jpeg`, and `coach_chat.jpeg` so they appear correctly below!
 
 | Dashboard | AI Food Logging | Coach AI Chat |
 | :---: | :---: | :---: |
-| <img src="screenshots/dashboard.jpg" height="400"> | <img src="screenshots/food_log.jpg" height="400"> | <img src="screenshots/coach_chat.jpg" height="400"> |
+| <img src="screenshots/dashboard.jpeg" height="400"> | <img src="screenshots/food_log.jpeg" height="400"> | <img src="screenshots/coach_chat.jpeg" height="400"> |
 | *Track daily calories and macros* | *Log food via image or natural text* | *Get personalised advice* |
 
 *(Optional: You can also record a short GIF of the app in action and add it here)*
