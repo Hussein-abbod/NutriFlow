@@ -44,8 +44,6 @@ graph TD
 | <img src="screenshots/dashboard.jpeg" height="400"> | <img src="screenshots/food_log.jpeg" height="400"> | <img src="screenshots/coach_chat.jpeg" height="400"> |
 | *Track daily calories and macros* | *Log food via image or natural text* | *Get personalised advice* |
 
-*(Optional: You can also record a short GIF of the app in action and add it here)*
-
 ## 🚀 Setup Instructions
 
 ### 1. Backend Setup
