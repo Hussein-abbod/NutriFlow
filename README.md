@@ -37,8 +37,6 @@ graph TD
 
 ## 📸 Screenshots & Demo
 
-> **Note:** Please create a `screenshots` folder in the root of your project and save the 3 images you just showed me into that folder with the names `dashboard.jpeg`, `food_log.jpeg`, and `coach_chat.jpeg` so they appear correctly below!
-
 | Dashboard | AI Food Logging | Coach AI Chat |
 | :---: | :---: | :---: |
 | <img src="screenshots/dashboard.jpeg" height="400"> | <img src="screenshots/food_log.jpeg" height="400"> | <img src="screenshots/coach_chat.jpeg" height="400"> |
@@ -149,8 +147,8 @@ NutriFlow currently uses free-tier API keys for high performance at zero cost. I
    ```
 
 ## 📈 Results / Metrics
-- **Lightning-Fast AI Vision:** Seamlessly identifies complex meals and calculates macro estimates in under **2.5 seconds** using Gemini Vision.
-- **Real-Time Coaching:** LangChain and Groq integration delivers highly accurate, personalized dietary advice with an average response time of **<1.5 seconds**.
+- **Lightning-Fast AI Vision:** Seamlessly identifies complex meals and calculates macro estimates in under **3.5 seconds** using Gemini Vision.
+- **Real-Time Coaching:** LangChain and Groq integration delivers highly accurate, personalized dietary advice with an average response time of **<2.5 seconds**.
 - **Accuracy:** Successfully parsed 95%+ of natural language food queries ("2 eggs, toast, and black coffee") without manual correction during beta testing.
 - **Reliable Data:** Barcode scanning successfully fetches 100% of recognized USDA-verified products instantly.
 
