@@ -1,0 +1,81 @@
+.picker {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-6);
+  border: 1px dashed var(--color-outline-variant);
+  border-radius: 16px;
+  background: var(--color-surface);
+  text-align: center;
+}
+
+.badge {
+  display: grid;
+  place-items: center;
+  padding: var(--space-4);
+  border-radius: var(--radius-card);
+  background: var(--gradient-photo);
+  color: var(--color-white);
+}
+
+.title {
+  margin-top: var(--space-4);
+  color: var(--color-on-surface);
+  font: var(--font-title-lg);
+}
+
+.text {
+  max-width: 300px;
+  margin-top: var(--space-2);
+  color: var(--color-text-secondary);
+  font: var(--font-body-md);
+}
+
+.sources {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  width: 100%;
+  max-width: 320px;
+  margin-top: var(--space-6);
+}
+
+/* ListTile with a coloured leading icon, radius 12 */
+.source {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  min-height: 56px;
+  padding: 0 var(--space-4);
+  border: 1px solid var(--color-card-border);
+  border-radius: var(--radius-chip);
+  background: var(--color-card);
+  color: var(--color-on-surface);
+  font: 400 16px/1.5 var(--font-family);
+  cursor: pointer;
+}
+
+.source:hover {
+  background: color-mix(in srgb, var(--color-primary) 4%, var(--color-card));
+}
+
+.source:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.cameraIcon {
+  color: var(--color-photo-source);
+}
+
+.galleryIcon {
+  color: var(--color-gallery-source);
+}
+
+.error {
+  width: 100%;
+  margin-top: var(--space-5);
+  text-align: start;
+}

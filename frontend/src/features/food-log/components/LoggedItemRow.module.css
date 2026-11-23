@@ -1,0 +1,57 @@
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 6px 0;
+}
+
+.text {
+  flex: 1;
+  min-width: 0;
+}
+
+.name {
+  overflow: hidden;
+  color: var(--color-on-surface);
+  font: 400 15px/1.4 var(--font-family);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.portion {
+  color: var(--color-text-secondary);
+  font: 400 13px/1.4 var(--font-family);
+}
+
+.calories {
+  flex-shrink: 0;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-chip);
+  background: var(--color-food-tile);
+  color: var(--color-text-secondary);
+  font: 500 12px/1.4 var(--font-family);
+}
+
+/* 16px icon like Flutter, inside a 44px touch target that overlaps the row padding */
+.remove {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  margin: -10px -12px -10px 0;
+  border: 0;
+  border-radius: var(--radius-full);
+  background: none;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+}
+
+.remove:hover {
+  background: color-mix(in srgb, var(--color-text-secondary) 10%, transparent);
+}
+
+.remove:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: -4px;
+}

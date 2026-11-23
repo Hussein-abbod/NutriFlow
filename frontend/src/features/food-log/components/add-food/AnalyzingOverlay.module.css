@@ -1,0 +1,57 @@
+.overlay {
+  position: absolute;
+  inset: 0;
+}
+
+/* _ScannerPainter: gradient fill (primary 0 → 50 %) down to a glowing 3px line, 2 s, reverse */
+.sweep {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 0;
+  border-bottom: 3px solid var(--color-primary);
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    color-mix(in srgb, var(--color-primary) 50%, transparent)
+  );
+  box-shadow: 0 4px 8px color-mix(in srgb, var(--color-primary) 60%, transparent);
+  animation: sweep 2s var(--ease-in-out) infinite alternate;
+}
+
+.scrim {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
+  background: rgb(0 0 0 / 0.4);
+  color: var(--color-white);
+  text-align: center;
+}
+
+.label {
+  font: 700 16px/1.4 var(--font-family);
+  text-shadow: 0 2px 4px rgb(0 0 0 / 0.54);
+}
+
+.step {
+  margin-top: calc(var(--space-3) * -1);
+  font: var(--font-body-sm);
+  text-shadow: 0 2px 4px rgb(0 0 0 / 0.54);
+}
+
+@keyframes sweep {
+  to {
+    height: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sweep {
+    display: none;
+  }
+}

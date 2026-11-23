@@ -8,7 +8,7 @@ import { GOAL_OPTIONS, STEP, stepFormId, SUGGESTED_GOAL_CHANGE_KG } from '../../
 import { useDraftSync } from '../../hooks/useDraftSync';
 import { createGoalSchema, type GoalChoice, type GoalFormValues } from '../../schemas/goalSchema';
 import { GOAL_PERIOD_RANGE_WEEKS, WEIGHT_RANGE_KG } from '../../schemas/limits';
-import { parseNumber } from '../../schemas/numberField';
+import { parseNumber } from '@/lib/forms/numberField';
 import { ChoiceTile } from '../ChoiceTile';
 import { GlassSlider } from '../GlassSlider';
 import { MeasureField } from '../MeasureField';

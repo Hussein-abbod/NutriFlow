@@ -2,6 +2,7 @@ export { AnimatedGradientRing } from './AnimatedGradientRing/AnimatedGradientRin
 export { BottomSheet } from './BottomSheet/BottomSheet';
 export { Button } from './Button/Button';
 export { Card } from './Card/Card';
+export { Dialog } from './Dialog/Dialog';
 export { EmptyState } from './EmptyState/EmptyState';
 export { ErrorState } from './ErrorState/ErrorState';
 export { GlassCard } from './GlassCard/GlassCard';

@@ -1,0 +1,91 @@
+.panel {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.searchRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  padding: var(--space-4);
+}
+
+.field {
+  flex: 1;
+  min-width: 0;
+  margin-right: 2px;
+}
+
+.clear {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: var(--radius-full);
+  background: none;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+}
+
+.clear:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: -2px;
+}
+
+/* Gradient icon buttons, radius 16, same height as the text field */
+.action {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 52px;
+  height: 56px;
+  border: 0;
+  border-radius: var(--radius-button);
+  color: var(--color-white);
+  cursor: pointer;
+}
+
+.action:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.action:focus-visible {
+  outline: 2px solid var(--color-on-surface);
+  outline-offset: 2px;
+}
+
+.search {
+  background: var(--gradient-primary);
+  box-shadow: 0 2px 4px color-mix(in srgb, var(--color-primary) 15%, transparent);
+}
+
+.ai {
+  background: var(--gradient-photo);
+  box-shadow: 0 2px 4px rgb(68 138 255 / 0.15);
+}
+
+.results {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  padding-top: var(--space-2);
+}
+
+.status {
+  display: grid;
+  flex: 1;
+  place-items: center;
+  padding: var(--space-8) var(--space-6);
+  color: var(--color-text-secondary);
+  font: var(--font-body-md);
+  text-align: center;
+}
+
+.error {
+  margin: var(--space-4);
+}

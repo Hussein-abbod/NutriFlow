@@ -1,7 +1,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render } from '@testing-library/react';
 import type { ReactElement } from 'react';
-import { createMemoryRouter, RouterProvider, type RouteObject } from 'react-router';
+import { createMemoryRouter, parsePath, RouterProvider, type RouteObject } from 'react-router';
 import { SnackbarHost } from '@/components';
 
 export function createTestQueryClient() {
@@ -13,6 +13,8 @@ export function createTestQueryClient() {
 interface RenderRouteOptions {
   routes: RouteObject[];
   initialPath?: string;
+  /** History state of the first entry (e.g. the foods handed to the confirm screen). */
+  initialState?: unknown;
   queryClient?: QueryClient;
 }
 
@@ -20,9 +22,12 @@ interface RenderRouteOptions {
 export function renderRoutes({
   routes,
   initialPath = '/',
+  initialState,
   queryClient = createTestQueryClient(),
 }: RenderRouteOptions) {
-  const router = createMemoryRouter(routes, { initialEntries: [initialPath] });
+  const router = createMemoryRouter(routes, {
+    initialEntries: [{ ...parsePath(initialPath), state: initialState }],
+  });
   const view = render(
     <QueryClientProvider client={queryClient}>
       <RouterProvider router={router} />

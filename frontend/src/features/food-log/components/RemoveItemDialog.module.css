@@ -1,0 +1,7 @@
+.remove {
+  color: var(--color-error);
+}
+
+.remove:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--color-error) 8%, transparent);
+}

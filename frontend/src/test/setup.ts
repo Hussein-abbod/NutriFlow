@@ -3,6 +3,7 @@ import { cleanup } from '@testing-library/react';
 import { afterAll, afterEach, beforeAll } from 'vitest';
 import { useSnackbarStore } from '@/components/Snackbar/snackbarStore';
 import { useSessionStore } from '@/features/auth/store/sessionStore';
+import { useAdviceStore } from '@/features/food-log/store/adviceStore';
 import { useOnboardingStore } from '@/features/onboarding/store/onboardingStore';
 import { tokenStore } from '@/lib/api';
 import { server } from './server';
@@ -33,5 +34,6 @@ afterEach(() => {
   useSessionStore.setState({ status: 'unknown' });
   useSnackbarStore.setState({ current: null });
   useOnboardingStore.setState({ userId: null, drafts: null, completed: false });
+  useAdviceStore.setState({ lastSubmittedLog: null });
 });
 afterAll(() => server.close());

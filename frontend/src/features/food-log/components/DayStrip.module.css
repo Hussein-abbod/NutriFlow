@@ -1,0 +1,70 @@
+/* Horizontal ListView, height 80, padding 8/16, items 4px apart on each side */
+.strip {
+  display: flex;
+  gap: var(--space-2);
+  height: 80px;
+  padding: var(--space-2) var(--space-5);
+  overflow-x: auto;
+  scrollbar-width: none;
+  overscroll-behavior-x: contain;
+}
+
+.strip::-webkit-scrollbar {
+  display: none;
+}
+
+.day {
+  /* Contains the visually-hidden month text, which would otherwise widen the page. */
+  position: relative;
+  display: flex;
+  flex: 0 0 48px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  border: 1px solid var(--color-card-border);
+  border-radius: 14px;
+  background: var(--color-surface);
+  color: var(--color-on-surface);
+  cursor: pointer;
+  transition:
+    flex-basis 250ms var(--ease-in-out),
+    background-color 250ms var(--ease-in-out),
+    box-shadow 250ms var(--ease-in-out);
+}
+
+.selected {
+  flex-basis: 56px;
+  border-color: transparent;
+  background: var(--color-primary);
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--color-primary) 15%, transparent);
+  color: var(--color-on-primary);
+}
+
+.day:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.weekday {
+  color: var(--color-text-secondary);
+  font: 500 11px/1.2 var(--font-family);
+}
+
+.selected .weekday {
+  color: color-mix(in srgb, var(--color-on-primary) 90%, transparent);
+}
+
+.date {
+  font: 600 18px/1.2 var(--font-family);
+}
+
+.selected .date {
+  font-size: 20px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .day {
+    transition: none;
+  }
+}

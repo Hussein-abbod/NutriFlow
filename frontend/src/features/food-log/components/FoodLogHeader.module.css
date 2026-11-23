@@ -1,0 +1,38 @@
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: calc(var(--space-3) + var(--safe-top)) var(--space-5) var(--space-2);
+  background: color-mix(in srgb, var(--color-background) 80%, transparent);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.avatar {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--color-card-border);
+  border-radius: var(--radius-full);
+  background: color-mix(in srgb, var(--color-primary) 10%, transparent);
+  color: var(--color-primary);
+  font: 700 14px/1 var(--font-family);
+}
+
+.title {
+  color: var(--color-primary);
+  font: 700 24px/1.2 var(--font-family);
+  letter-spacing: -0.5px;
+}
+
+/* IconButton footprint (48px) so the header keeps Flutter's height */
+.bell {
+  box-sizing: content-box;
+  padding: var(--space-3);
+  color: var(--color-text-secondary);
+}

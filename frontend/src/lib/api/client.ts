@@ -10,6 +10,8 @@ export interface RequestOptions {
   /** Send the bearer token and, on 401, refresh once and retry. Defaults to true. */
   authenticated?: boolean;
   signal?: AbortSignal;
+  /** Overrides the client timeout (e.g. for slow AI endpoints). */
+  timeoutMs?: number;
 }
 
 export interface ApiClientConfig {
@@ -50,7 +52,10 @@ export function createApiClient(config: ApiClientConfig) {
     if (token) headers.Authorization = `Bearer ${token}`;
 
     const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(TIMEOUT_REASON), config.timeoutMs);
+    const timer = setTimeout(
+      () => controller.abort(TIMEOUT_REASON),
+      options.timeoutMs ?? config.timeoutMs,
+    );
     const forwardAbort = () => controller.abort(options.signal?.reason);
     if (options.signal?.aborted) forwardAbort();
     else options.signal?.addEventListener('abort', forwardAbort, { once: true });

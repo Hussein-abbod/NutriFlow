@@ -156,6 +156,106 @@ export interface ExtendGoalRequestDto {
   extra_weeks: number;
 }
 
+export type LogMethod = 'text' | 'barcode' | 'image';
+
+/** backend: schemas.food_log.TextRequest */
+export interface TextSearchRequestDto {
+  query: string;
+  meal_type: MealType;
+  use_ai_parse: boolean;
+}
+
+/** backend: schemas.food_log.BarcodeRequest */
+export interface BarcodeRequestDto {
+  barcode: string;
+}
+
+/** backend: schemas.food_log.ImageRequest (base64 without the `data:` prefix) */
+export interface ImageRequestDto {
+  image_base64: string;
+  meal_type: MealType;
+}
+
+/** backend: schemas.food_log.FoodItemResult — nutrients are per 100 g. */
+export interface FoodItemResultDto {
+  fdc_id: number | null;
+  food_name: string;
+  brand_name: string | null;
+  serving_size: number | null;
+  serving_unit: string | null;
+  calories: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+  fiber: number;
+  sugar: number;
+  sodium: number;
+}
+
+/** backend: schemas.food_log.FoodItemSubmit — nutrients for the whole portion. */
+export interface FoodItemSubmitDto {
+  food_name: string;
+  brand_name: string | null;
+  quantity: number;
+  unit: string;
+  calories: number;
+  protein: number;
+  carbs: number;
+  fat: number;
+  fiber: number;
+  sodium: number;
+  sugar: number;
+  nutritionix_food_id?: string;
+}
+
+/** backend: schemas.food_log.FoodSubmitRequest (`log_date` is an ISO day) */
+export interface FoodSubmitRequestDto {
+  meal_type: MealType;
+  log_method: LogMethod;
+  log_date: string;
+  items: FoodItemSubmitDto[];
+}
+
+/** backend: schemas.food_log.FoodLogItemOut */
+export interface FoodLogItemDto {
+  id: number;
+  food_name: string;
+  brand_name: string | null;
+  quantity: number | null;
+  unit: string | null;
+  calories: number | null;
+  protein: number | null;
+  carbs: number | null;
+  fat: number | null;
+}
+
+/** backend: schemas.food_log.FoodLogOut */
+export interface FoodLogDto {
+  id: number;
+  meal_type: MealType;
+  log_date: string;
+  log_method: LogMethod;
+  total_calories: number | null;
+  total_protein: number | null;
+  total_carbs: number | null;
+  total_fat: number | null;
+  ai_advice: string | null;
+  items: FoodLogItemDto[];
+}
+
+/** backend: schemas.food_log.TodayLogsOut (one day, grouped by meal) */
+export interface DayLogsDto {
+  date: string;
+  breakfast: FoodLogDto[];
+  lunch: FoodLogDto[];
+  snack: FoodLogDto[];
+  dinner: FoodLogDto[];
+  total_calories: number;
+  total_protein: number;
+  total_carbs: number;
+  total_fat: number;
+}
+
 /** backend: schemas.dashboard.MessageOut */
 export interface MessageDto {
   message: string;

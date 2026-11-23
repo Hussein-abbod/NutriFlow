@@ -1,0 +1,20 @@
+.page {
+  width: 100%;
+  max-width: var(--content-max-width);
+  margin: 0 auto;
+  padding-bottom: var(--space-4);
+}
+
+.meals {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-1) var(--space-5) var(--space-4);
+}
+
+.status {
+  display: grid;
+  place-items: center;
+  min-height: 40dvh;
+  padding: var(--space-6);
+}

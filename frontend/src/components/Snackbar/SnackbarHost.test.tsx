@@ -1,7 +1,7 @@
 import { act, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { SNACKBAR_DURATION_MS, SnackbarHost } from './SnackbarHost';
-import { showSnackbar, useSnackbarStore } from './snackbarStore';
+import { SnackbarHost } from './SnackbarHost';
+import { showSnackbar, SNACKBAR_DURATION_MS, useSnackbarStore } from './snackbarStore';
 
 describe('SnackbarHost', () => {
   afterEach(() => {
@@ -22,6 +22,16 @@ describe('SnackbarHost', () => {
     expect(screen.getByRole('status')).toHaveTextContent('Saved');
     act(() => vi.advanceTimersByTime(SNACKBAR_DURATION_MS));
     expect(screen.queryByText('Saved')).not.toBeInTheDocument();
+  });
+
+  it('can be shown for a shorter time', () => {
+    vi.useFakeTimers();
+    render(<SnackbarHost />);
+    act(() => showSnackbar('Rice added', 'default', 1000));
+    act(() => vi.advanceTimersByTime(999));
+    expect(screen.getByRole('status')).toHaveTextContent('Rice added');
+    act(() => vi.advanceTimersByTime(1));
+    expect(screen.queryByText('Rice added')).not.toBeInTheDocument();
   });
 
   it('replaces the current message with the newest one', () => {

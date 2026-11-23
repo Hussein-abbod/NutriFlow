@@ -4,6 +4,7 @@ import { beforeAll, describe, expect, it } from 'vitest';
 import { sessionHandlers } from '@/test/authHandlers';
 import { dashboardHandlers } from '@/test/dashboardHandlers';
 import { buildUser } from '@/test/fixtures';
+import { foodLogHandlers } from '@/test/foodLogHandlers';
 import { renderApp } from '@/test/renderApp';
 import { server } from '@/test/server';
 
@@ -12,7 +13,7 @@ beforeAll(() => import('@/features/dashboard'));
 
 describe('AppShell bottom navigation', () => {
   it('has the four Flutter tabs and starts on Food Log', async () => {
-    server.use(...sessionHandlers(buildUser({ is_profile_complete: true })));
+    server.use(...sessionHandlers(buildUser({ is_profile_complete: true })), ...foodLogHandlers());
     const { router } = renderApp('/home');
     await waitFor(() => expect(router.state.location.pathname).toBe('/food-log'));
 
@@ -25,14 +26,15 @@ describe('AppShell bottom navigation', () => {
       'Profile',
     ]);
     expect(screen.getByRole('link', { name: 'Food Log' })).toHaveAttribute('aria-current', 'page');
-    expect(screen.getByRole('heading', { name: 'Food Log' })).toBeInTheDocument();
-    expect(screen.getByText('Coming soon')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'NutriFlow food log' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'Breakfast' })).toBeInTheDocument();
   });
 
   it('switches tabs', async () => {
     server.use(
       ...sessionHandlers(buildUser({ is_profile_complete: true })),
       ...dashboardHandlers(),
+      ...foodLogHandlers(),
     );
     const user = userEvent.setup();
     const { router } = renderApp('/food-log');

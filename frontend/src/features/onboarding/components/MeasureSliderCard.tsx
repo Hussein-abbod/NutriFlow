@@ -1,6 +1,6 @@
 import type { ChangeEvent, Ref } from 'react';
 import { GlassCard } from '@/components';
-import { parseNumber } from '../schemas/numberField';
+import { parseNumber } from '@/lib/forms/numberField';
 import { GlassSlider } from './GlassSlider';
 import { MeasureField } from './MeasureField';
 import styles from './OnboardingCard.module.css';

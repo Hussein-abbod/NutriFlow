@@ -3,9 +3,6 @@ import { cn } from '@/lib/utils/cn';
 import { useSnackbarStore } from './snackbarStore';
 import styles from './Snackbar.module.css';
 
-/** Flutter SnackBar default duration. */
-export const SNACKBAR_DURATION_MS = 4000;
-
 /** Renders the current floating snackbar. Mount once at the app root. */
 export function SnackbarHost() {
   const current = useSnackbarStore((state) => state.current);
@@ -13,7 +10,7 @@ export function SnackbarHost() {
 
   useEffect(() => {
     if (!current) return;
-    const timer = setTimeout(dismiss, SNACKBAR_DURATION_MS);
+    const timer = setTimeout(dismiss, current.durationMs);
     return () => clearTimeout(timer);
   }, [current, dismiss]);
 

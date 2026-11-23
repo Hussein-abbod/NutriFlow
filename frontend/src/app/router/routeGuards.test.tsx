@@ -5,6 +5,7 @@ import { describe, expect, it } from 'vitest';
 import { tokenStore } from '@/lib/api';
 import { sessionHandlers } from '@/test/authHandlers';
 import { buildUser, TEST_API } from '@/test/fixtures';
+import { foodLogHandlers } from '@/test/foodLogHandlers';
 import { renderApp } from '@/test/renderApp';
 import { server } from '@/test/server';
 
@@ -25,10 +26,10 @@ describe('splash + route guards', () => {
   });
 
   it('restores a session from the refresh cookie and opens the first tab', async () => {
-    server.use(...sessionHandlers(onboardedUser));
+    server.use(...sessionHandlers(onboardedUser), ...foodLogHandlers());
     const { router } = renderApp('/');
     await waitFor(() => expect(router.state.location.pathname).toBe('/food-log'));
-    expect(await screen.findByRole('heading', { name: 'Food Log' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'NutriFlow food log' })).toBeInTheDocument();
     expect(tokenStore.getAccessToken()).toBe('restored');
   });
 

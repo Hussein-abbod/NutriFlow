@@ -1,0 +1,81 @@
+.panel {
+  position: relative;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  justify-content: flex-end;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.hidden {
+  visibility: hidden;
+}
+
+.center {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+}
+
+.hint {
+  position: absolute;
+  top: var(--space-4);
+  right: var(--space-6);
+  left: var(--space-6);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-full);
+  background: rgb(0 0 0 / 0.55);
+  color: var(--color-white);
+  font: var(--font-body-md);
+  text-align: center;
+}
+
+.bottom {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+/* Error banner: Positioned(bottom: 32, left: 24, right: 24) */
+.error {
+  margin: 0 var(--space-6) var(--space-8);
+}
+
+.manualButton {
+  display: inline-flex;
+  align-items: center;
+  align-self: center;
+  gap: var(--space-2);
+  min-height: var(--tap-target);
+  margin-bottom: calc(var(--space-6) + var(--safe-bottom));
+  padding: 0 var(--space-5);
+  border: 1px solid rgb(255 255 255 / 0.5);
+  border-radius: var(--radius-full);
+  background: rgb(0 0 0 / 0.55);
+  color: var(--color-white);
+  font: var(--font-label-lg);
+  cursor: pointer;
+}
+
+.manualButton:focus-visible {
+  outline: 2px solid var(--color-white);
+  outline-offset: 2px;
+}
+
+.manualCard {
+  padding: var(--space-6) var(--space-6) calc(var(--space-6) + var(--safe-bottom));
+  border-radius: var(--radius-sheet) var(--radius-sheet) 0 0;
+  background: var(--color-surface);
+  color: var(--color-text);
+}

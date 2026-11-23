@@ -1,0 +1,50 @@
+/* margin 16, padding 24, radius 24, theme gradient, soft primary glow */
+.card {
+  margin: var(--space-4);
+  padding: var(--space-6);
+  border-radius: var(--radius-dialog);
+  background: var(--gradient-theme-primary);
+  box-shadow: 0 4px 8px color-mix(in srgb, var(--color-primary) 15%, transparent);
+  color: var(--color-on-theme-gradient);
+  text-align: center;
+}
+
+/* Flutter: white 70 % at 13px, below AA on the gradient; the 90 % token passes. */
+.label {
+  color: var(--color-on-theme-gradient-muted);
+  font: 400 13px/1.4 var(--font-family);
+}
+
+.calories {
+  margin-top: var(--space-1);
+  font: 800 36px/1.2 var(--font-family);
+}
+
+.macros {
+  display: flex;
+  margin-bottom: 0;
+  justify-content: space-around;
+  margin-top: var(--space-4);
+}
+
+/* Visual order icon / value / label, DOM order label → value for screen readers */
+.macro {
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: center;
+}
+
+.macroIcon {
+  margin-bottom: var(--space-1);
+  color: var(--color-on-theme-gradient-muted);
+}
+
+.macroValue {
+  margin: 0;
+  font: 800 18px/1.3 var(--font-family);
+}
+
+.macroLabel {
+  color: var(--color-on-theme-gradient-muted);
+  font: 400 11px/1.4 var(--font-family);
+}

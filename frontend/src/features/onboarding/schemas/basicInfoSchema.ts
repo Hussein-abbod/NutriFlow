@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { AGE_RANGE, HEIGHT_RANGE_CM, WEIGHT_RANGE_KG } from './limits';
-import { numberField } from './numberField';
+import { numberField } from '@/lib/forms/numberField';
 
 /** step_basic_info.dart: gender, age, height, weight. */
 export const basicInfoSchema = z.object({

@@ -146,6 +146,19 @@ describe('createApiClient', () => {
     await expect(makeClient(30).get('/slow')).rejects.toMatchObject({ kind: 'timeout' });
   });
 
+  it('lets one request wait longer than the client timeout', async () => {
+    server.use(
+      http.post(`${BASE}/slow-ai`, async () => {
+        await delay(80);
+        return HttpResponse.json({ done: true });
+      }),
+    );
+    const client = makeClient(30);
+    await expect(client.post('/slow-ai', {}, { timeoutMs: 1_000 })).resolves.toEqual({
+      done: true,
+    });
+  });
+
   it('refreshes once on 401 and retries with the new token', async () => {
     tokenStore.setAccessToken('expired');
     server.use(protectedEndpoint('fresh'), refreshReturns('fresh'));

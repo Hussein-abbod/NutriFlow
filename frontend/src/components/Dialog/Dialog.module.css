@@ -1,0 +1,73 @@
+.root {
+  position: fixed;
+  inset: 0;
+  z-index: 110;
+  display: grid;
+  place-items: center;
+  padding: var(--space-10) var(--space-6);
+}
+
+.scrim {
+  position: absolute;
+  inset: 0;
+  background: var(--color-scrim);
+  animation: fade-in var(--duration-fast) var(--ease-out) both;
+}
+
+/* AlertDialog: surface, radius 24, padding 24, min 280 / max 560 wide */
+.dialog {
+  position: relative;
+  width: 100%;
+  min-width: min(280px, 100%);
+  max-width: 560px;
+  padding: var(--space-6);
+  border-radius: var(--radius-dialog);
+  background: var(--color-surface);
+  box-shadow: 0 6px 24px rgb(0 0 0 / 0.2);
+  color: var(--color-text);
+  animation: dialog-in var(--duration-normal) var(--ease-smooth-decelerate) both;
+}
+
+.dialog:focus-visible {
+  outline: none;
+}
+
+.title {
+  font: var(--font-headline-sm);
+  color: var(--color-on-surface);
+}
+
+.body {
+  margin-top: var(--space-4);
+  font: var(--font-body-md);
+  color: var(--color-text-secondary);
+  overflow-wrap: anywhere;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  margin-top: var(--space-6);
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes dialog-in {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scrim,
+  .dialog {
+    animation: none;
+  }
+}

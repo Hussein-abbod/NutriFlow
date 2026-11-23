@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import type { GoalType } from '@/types/api';
 import { GOAL_PERIOD_RANGE_WEEKS, WEIGHT_RANGE_KG } from './limits';
-import { numberField } from './numberField';
+import { numberField } from '@/lib/forms/numberField';
 
 const GOAL_TYPES = [
   'lose_weight',

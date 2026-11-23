@@ -1,5 +1,9 @@
 import type {
   DailyCaloriesDto,
+  DayLogsDto,
+  FoodItemResultDto,
+  FoodLogDto,
+  FoodLogItemDto,
   GoalProgressDto,
   TodaySummaryDto,
   TokenResponseDto,
@@ -72,5 +76,80 @@ export function buildGoalProgress(overrides: Partial<GoalProgressDto> = {}): Goa
     start_date: '2026-10-01',
     target_date: '2027-01-04',
     ...overrides,
+  };
+}
+
+/** USDA rice: values per 100 g, default serving 100 g. */
+export function buildFoodResult(overrides: Partial<FoodItemResultDto> = {}): FoodItemResultDto {
+  return {
+    fdc_id: 169757,
+    food_name: 'Rice, white, long-grain, cooked',
+    brand_name: null,
+    serving_size: 100,
+    serving_unit: 'g',
+    calories: 130,
+    protein: 2.7,
+    carbs: 28.2,
+    fat: 0.3,
+    fiber: 0.4,
+    sugar: 0.1,
+    sodium: 1,
+    ...overrides,
+  };
+}
+
+export function buildLogItem(overrides: Partial<FoodLogItemDto> = {}): FoodLogItemDto {
+  return {
+    id: 11,
+    food_name: 'Rice, white, long-grain, cooked',
+    brand_name: null,
+    quantity: 200,
+    unit: 'g',
+    calories: 260,
+    protein: 5.4,
+    carbs: 56.4,
+    fat: 0.6,
+    ...overrides,
+  };
+}
+
+export function buildFoodLog(overrides: Partial<FoodLogDto> = {}): FoodLogDto {
+  const items = overrides.items ?? [buildLogItem()];
+  return {
+    id: 7,
+    meal_type: 'breakfast',
+    log_date: '2026-11-24',
+    log_method: 'text',
+    total_calories: items.reduce((sum, item) => sum + (item.calories ?? 0), 0),
+    total_protein: 5.4,
+    total_carbs: 56.4,
+    total_fat: 0.6,
+    ai_advice: 'Great start! Add some protein at lunch.',
+    ...overrides,
+    items,
+  };
+}
+
+/** One day of logs; totals are summed from the meals given. */
+export function buildDayLogs(date: string, meals: Partial<DayLogsDto> = {}): DayLogsDto {
+  const day: DayLogsDto = {
+    date,
+    breakfast: [],
+    lunch: [],
+    snack: [],
+    dinner: [],
+    total_calories: 0,
+    total_protein: 0,
+    total_carbs: 0,
+    total_fat: 0,
+    ...meals,
+  };
+  const logs = [...day.breakfast, ...day.lunch, ...day.snack, ...day.dinner];
+  return {
+    ...day,
+    total_calories: logs.reduce((sum, log) => sum + (log.total_calories ?? 0), 0),
+    total_protein: logs.reduce((sum, log) => sum + (log.total_protein ?? 0), 0),
+    total_carbs: logs.reduce((sum, log) => sum + (log.total_carbs ?? 0), 0),
+    total_fat: logs.reduce((sum, log) => sum + (log.total_fat ?? 0), 0),
   };
 }

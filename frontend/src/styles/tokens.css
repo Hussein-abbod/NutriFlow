@@ -107,6 +107,26 @@
   --shadow-card-summary: 0 4px 12px rgb(0 0 0 / 0.03);
   --shadow-card-soft: 0 2px 8px rgb(0 0 0 / 0.02);
 
+  /* ── Food log (food_log_tab.dart, add_food_sheet.dart, food_confirm_screen.dart) ── */
+  --color-meal-breakfast: var(--color-tertiary);
+  --color-meal-lunch: #004da8;
+  --color-meal-snack: var(--color-primary);
+  --color-meal-dinner: var(--color-on-secondary-container);
+  --color-food-tile: #f8f9ff; /* empty meal button, calorie pill */
+  --color-food-divider: rgb(217 227 246 / 0.5);
+  --color-food-chip: #f5f7fa; /* confirm qty pill, edit inputs, advice stats */
+  --color-option-tile: #ffffff;
+  --color-option-tile-border: #f5f5f5; /* Colors.grey.shade100 */
+  --shadow-option-tile: 0 4px 12px rgb(0 0 0 / 0.04);
+  --gradient-photo: linear-gradient(to right, #448aff, #7c4dff);
+  --color-photo-source: #448aff;
+  --color-gallery-source: #00b4db;
+  /* Text on --gradient-theme-primary cards (white; black on the bright dark-mode gradient) */
+  --color-on-theme-gradient: #ffffff;
+  --color-on-theme-gradient-muted: rgb(255 255 255 / 0.9);
+  --color-on-theme-gradient-chip: rgb(255 255 255 / 0.2);
+  --color-scanner-background: #000000;
+
   /* ── Typography (Inter, Material 3 scale from _textTheme) ── */
   --font-family: 'Inter Variable', Inter, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   --font-display-lg: 700 57px/1.12 var(--font-family);
@@ -252,6 +272,17 @@
     --color-ring-track-soft: rgb(255 255 255 / 0.06);
     /* #BA1A1A is unreadable on the dark card; the dark error red keeps the meaning */
     --color-over-target: #ff5252;
+    --color-meal-lunch: #adc6ff;
+    --color-food-tile: rgb(255 255 255 / 0.02);
+    --color-food-divider: rgb(255 255 255 / 0.06);
+    --color-food-chip: rgb(255 255 255 / 0.06);
+    --color-option-tile: rgb(255 255 255 / 0.04);
+    --color-option-tile-border: rgb(255 255 255 / 0.06);
+    --shadow-option-tile: 0 4px 12px rgb(0 0 0 / 0.15);
+    /* Flutter keeps white text on #4DE082 (≈1.6:1); Material's dark onPrimary is black. */
+    --color-on-theme-gradient: #000000;
+    --color-on-theme-gradient-muted: rgb(0 0 0 / 0.75);
+    --color-on-theme-gradient-chip: rgb(0 0 0 / 0.12);
     --shadow-card-summary: 0 4px 12px rgb(0 0 0 / 0.08);
     --shadow-card-soft: 0 2px 8px rgb(0 0 0 / 0.06);
   }

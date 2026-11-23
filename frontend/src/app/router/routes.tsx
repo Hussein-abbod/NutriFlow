@@ -1,14 +1,16 @@
 import { Navigate, type RouteObject } from 'react-router';
 import { LoginPage, paths, RegisterPage } from '@/features/auth';
+import { FoodLogPage, foodLogPaths } from '@/features/food-log';
 import { OnboardingPage } from '@/features/onboarding';
 import { AppShell } from '../layout/AppShell';
 import { CoachPlaceholderPage } from '../placeholders/CoachPlaceholderPage';
-import { FoodLogPlaceholderPage } from '../placeholders/FoodLogPlaceholderPage';
 import { ProfilePlaceholderPage } from '../placeholders/ProfilePlaceholderPage';
 import { RootLayout } from './RootLayout';
 import { RootRedirect } from './RootRedirect';
 import { RouteGate } from './RouteGate';
 import { DEFAULT_TAB_PATH, tabPaths } from './tabs';
+
+const addFoodScreens = () => import('@/features/food-log/addFoodScreens');
 
 export interface AppRouteOptions {
   splashMinDurationMs?: number;
@@ -38,7 +40,7 @@ export function createAppRoutes({ splashMinDurationMs }: AppRouteOptions = {}): 
             {
               element: <AppShell />,
               children: [
-                { path: tabPaths.foodLog, element: <FoodLogPlaceholderPage /> },
+                { path: tabPaths.foodLog, element: <FoodLogPage /> },
                 {
                   path: tabPaths.dashboard,
                   // Lazy: keeps Recharts out of the bundle for login and onboarding.
@@ -49,6 +51,23 @@ export function createAppRoutes({ splashMinDurationMs }: AppRouteOptions = {}): 
                 { path: tabPaths.coach, element: <CoachPlaceholderPage /> },
                 { path: tabPaths.profile, element: <ProfilePlaceholderPage /> },
               ],
+            },
+            // Screens Flutter pushes over the tabs (full screen, no bottom nav), lazy-loaded.
+            {
+              path: foodLogPaths.search,
+              lazy: async () => ({ Component: (await addFoodScreens()).TextSearchPage }),
+            },
+            {
+              path: foodLogPaths.barcode,
+              lazy: async () => ({ Component: (await addFoodScreens()).BarcodeScanPage }),
+            },
+            {
+              path: foodLogPaths.photo,
+              lazy: async () => ({ Component: (await addFoodScreens()).PhotoLogPage }),
+            },
+            {
+              path: foodLogPaths.confirm,
+              lazy: async () => ({ Component: (await addFoodScreens()).FoodConfirmPage }),
             },
           ],
         },

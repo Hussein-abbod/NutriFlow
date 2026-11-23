@@ -1,0 +1,39 @@
+.items {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 10px;
+  padding: 0 var(--space-4);
+  margin: 0;
+  list-style: none;
+}
+
+.empty {
+  flex: 1;
+  padding: var(--space-6);
+  color: var(--color-text-secondary);
+  font: var(--font-body-md);
+  text-align: center;
+}
+
+.footer {
+  position: sticky;
+  bottom: 0;
+  padding: var(--space-4) var(--space-4) calc(var(--space-4) + var(--safe-bottom));
+  background: linear-gradient(to top, var(--color-background) 75%, transparent);
+}
+
+/* Disabled while empty / submitting: Flutter greys the button out */
+.logMeal:disabled:not([aria-busy]) {
+  background: color-mix(in srgb, var(--color-text-secondary) 30%, transparent);
+  box-shadow: none;
+  opacity: 1;
+}
+
+.logMeal[aria-busy] {
+  opacity: 0.85;
+}
+
+.spinner {
+  display: inline-flex;
+}
