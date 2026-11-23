@@ -3,19 +3,32 @@ Authentication service layer for NutriFlow.
 Handles user creation, credential verification, and token lifecycle.
 """
 
-from sqlalchemy.orm import Session
-from fastapi import HTTPException, status
+from dataclasses import dataclass
+from typing import Optional
 
+from fastapi import HTTPException, status
+from sqlalchemy.orm import Session
+
+from app.config import get_settings
 from app.models.user import User
 from app.schemas.user import UserCreate
 from app.utils.security import (
-    hash_password,
-    verify_password,
     create_access_token,
     create_refresh_token,
     decode_token,
-    blacklist_token,
+    hash_password,
+    revoke_token,
+    verify_password,
 )
+
+settings = get_settings()
+
+
+@dataclass(frozen=True)
+class TokenPair:
+    access_token: str
+    refresh_token: str
+    expires_in: int  # access-token lifetime in seconds
 
 
 def create_user(db: Session, user_data: UserCreate) -> User:
@@ -29,6 +42,7 @@ def create_user(db: Session, user_data: UserCreate) -> User:
     user = User(
         email=user_data.email,
         hashed_password=hash_password(user_data.password),
+        full_name=user_data.full_name,
     )
     db.add(user)
     db.commit()
@@ -48,46 +62,39 @@ def authenticate_user(db: Session, email: str, password: str) -> User:
     return user
 
 
-def generate_tokens(user: User) -> dict:
-    """Generate access + refresh token pair for a user."""
-    token_data = {"sub": str(user.id)}
-    access_token = create_access_token(token_data)
-    refresh_token = create_refresh_token(token_data)
-    return {
-        "access_token": access_token,
-        "refresh_token": refresh_token,
-        "token_type": "bearer",
-    }
-
-
-def refresh_access_token(refresh_token_str: str) -> dict:
-    """
-    Validate the refresh token and issue a new access + refresh pair.
-    Blacklists the old refresh token (rotation).
-    """
-    payload = decode_token(refresh_token_str)
-    token_type = payload.get("type")
-    if token_type != "refresh":
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid token type. Expected a refresh token.",
-        )
-    user_id = payload.get("sub")
-    if user_id is None:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid refresh token.",
-        )
-    # Rotate: blacklist old, issue new pair
-    blacklist_token(refresh_token_str)
+def generate_tokens(user_id: int) -> TokenPair:
+    """Generate an access + refresh token pair for a user id."""
     token_data = {"sub": str(user_id)}
-    return {
-        "access_token": create_access_token(token_data),
-        "refresh_token": create_refresh_token(token_data),
-        "token_type": "bearer",
-    }
+    return TokenPair(
+        access_token=create_access_token(token_data),
+        refresh_token=create_refresh_token(token_data),
+        expires_in=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
+    )
 
 
-def logout_user(token: str) -> None:
-    """Blacklist the current access token."""
-    blacklist_token(token)
+def refresh_tokens(db: Session, refresh_token: Optional[str]) -> TokenPair:
+    """
+    Validate a refresh token and issue a new pair (rotation: the old one is revoked).
+    Raises 401 when the token is missing, invalid, revoked, or the user no longer exists.
+    """
+    if not refresh_token:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Refresh token missing.",
+        )
+    payload = decode_token(refresh_token, expected_type="refresh")
+    user = db.query(User).filter(User.id == int(payload["sub"])).first()
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="User not found",
+        )
+    revoke_token(refresh_token)
+    return generate_tokens(user.id)
+
+
+def logout(access_token: Optional[str], refresh_token: Optional[str]) -> None:
+    """Revoke whichever tokens the client presented."""
+    for token in (access_token, refresh_token):
+        if token:
+            revoke_token(token)

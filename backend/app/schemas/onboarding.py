@@ -1,8 +1,11 @@
 """Pydantic schemas for Onboarding endpoints."""
 
-from pydantic import BaseModel, Field
-from typing import Optional, List
 from enum import Enum
+from typing import Optional
+
+from pydantic import BaseModel, Field
+
+from app.schemas.common import Age, AllergyList, FullName, HeightCm, WeightKg
 
 
 class ActivityLevel(str, Enum):
@@ -24,11 +27,11 @@ class GoalType(str, Enum):
 
 class ProfileData(BaseModel):
     """Step 2+3: Basic info + activity level."""
-    full_name: str = Field(..., min_length=1, max_length=255)
-    age: int = Field(..., ge=10, le=100)
+    full_name: FullName
+    age: Age
     gender: str = Field(..., pattern="^(male|female)$")
-    height_cm: float = Field(..., gt=0, le=300)
-    weight_kg: float = Field(..., gt=0, le=500)
+    height_cm: HeightCm
+    weight_kg: WeightKg
     activity_level: ActivityLevel
 
 
@@ -41,7 +44,7 @@ class GoalData(BaseModel):
 
 class AllergiesData(BaseModel):
     """Step 5: Food allergies."""
-    food_allergies: List[str] = Field(default_factory=list)
+    food_allergies: AllergyList = Field(default_factory=list)
 
 
 # ---------- Response schemas ----------
@@ -62,13 +65,3 @@ class GoalResponse(BaseModel):
     suggested_weeks: Optional[int] = None
     targets: Optional[NutritionTargets] = None
 
-
-class RegisterWithTokens(BaseModel):
-    """Combined registration response: user data + tokens."""
-    id: int
-    email: str
-    full_name: Optional[str] = None
-    is_profile_complete: bool = False
-    access_token: str
-    refresh_token: str
-    token_type: str = "bearer"

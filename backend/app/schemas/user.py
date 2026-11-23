@@ -1,9 +1,20 @@
-"""Pydantic schemas for User."""
+"""Pydantic schemas for User, auth and token payloads."""
 
-from pydantic import BaseModel, EmailStr, Field
-from typing import Optional, List
 from datetime import datetime
 from enum import Enum
+from typing import List, Optional
+
+from pydantic import BaseModel, EmailStr
+
+from app.schemas.common import (
+    Age,
+    AllergyList,
+    ExistingPassword,
+    FullName,
+    HeightCm,
+    NewPassword,
+    WeightKg,
+)
 
 
 class ActivityLevel(str, Enum):
@@ -24,33 +35,38 @@ class GoalType(str, Enum):
 
 
 class UserCreate(BaseModel):
-    """Registration — email + password only."""
+    """Registration — email + password, optional full name (asked on the sign-up form)."""
     email: EmailStr
-    password: str = Field(..., min_length=8, max_length=128)
+    password: NewPassword
+    full_name: Optional[FullName] = None
 
 
 class UserLogin(BaseModel):
     """Login credentials."""
     email: EmailStr
-    password: str
+    password: ExistingPassword
 
 
-class UserUpdate(BaseModel):
-    """Update user profile (all optional)."""
-    full_name: Optional[str] = Field(None, max_length=255)
-    age: Optional[int] = Field(None, ge=13, le=120)
-    gender: Optional[str] = Field(None, pattern="^(male|female|other)$")
-    height_cm: Optional[float] = Field(None, gt=0, le=300)
-    weight_kg: Optional[float] = Field(None, gt=0, le=500)
-    activity_level: Optional[ActivityLevel] = None
-    goal_type: Optional[GoalType] = None
-    goal_weight_kg: Optional[float] = Field(None, gt=0, le=500)
-    goal_period_weeks: Optional[int] = Field(None, ge=1, le=104)
-    daily_calories_target: Optional[float] = Field(None, ge=0)
-    daily_protein_target: Optional[float] = Field(None, ge=0)
-    daily_carbs_target: Optional[float] = Field(None, ge=0)
-    daily_fat_target: Optional[float] = Field(None, ge=0)
-    food_allergies: Optional[List[str]] = None
+class ProfileUpdateRequest(BaseModel):
+    """Partial profile update from the Profile tab."""
+    full_name: Optional[FullName] = None
+    age: Optional[Age] = None
+    height_cm: Optional[HeightCm] = None
+    weight_kg: Optional[WeightKg] = None
+
+
+class PasswordChangeRequest(BaseModel):
+    current_password: ExistingPassword
+    new_password: NewPassword
+
+
+class AllergiesRequest(BaseModel):
+    allergies: AllergyList
+
+
+class RefreshTokenRequest(BaseModel):
+    """Body for native clients. Web clients send the refresh token as a cookie instead."""
+    refresh_token: Optional[str] = None
 
 
 # ---------- Response schemas ----------
@@ -81,18 +97,29 @@ class UserOut(BaseModel):
     model_config = {"from_attributes": True}
 
 
-# ---------- Token schemas ----------
-
-
-class Token(BaseModel):
+class TokenResponse(BaseModel):
+    """
+    Access token for the client to keep in memory.
+    `refresh_token` is only present for native clients; web clients get it as a cookie.
+    """
     access_token: str
-    refresh_token: str
     token_type: str = "bearer"
+    expires_in: int
+    refresh_token: Optional[str] = None
 
 
-class TokenData(BaseModel):
-    user_id: Optional[int] = None
+class RegisterResponse(TokenResponse):
+    """Registration response: the new user's basics + tokens."""
+    id: int
+    email: str
+    full_name: Optional[str] = None
+    is_profile_complete: bool = False
 
 
-class RefreshTokenRequest(BaseModel):
-    refresh_token: str
+class AllergiesOut(BaseModel):
+    message: str
+    allergies: List[str]
+
+
+class MessageOut(BaseModel):
+    message: str
