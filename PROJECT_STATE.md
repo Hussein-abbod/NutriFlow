@@ -3,7 +3,7 @@
 > Every AI session: read [AGENTS.md](AGENTS.md) first, then this file.
 > At the end of the session, update this file so the next session can continue.
 
-_Last updated: 2026-11-24 — session 2 finished._
+_Last updated: 2026-11-24 — session 3 mostly done (review fixes pending, see "Next step")._
 
 ---
 
@@ -21,7 +21,7 @@ _Last updated: 2026-11-24 — session 2 finished._
 | --- | --- | --- |
 | 1 | Foundation: backend tests + security fixes, frontend setup, design system, API client, auth (splash, login, register) | ✅ Done |
 | 2 | Onboarding (6 steps), app shell with bottom tabs, dashboard tab | ✅ Done |
-| 3 | Food logging: text / barcode / image, confirm, edit, AI advice, history, delete | ⬜ Not started |
+| 3 | Food logging: text / barcode / image, confirm, edit, AI advice, history, delete | 🟨 Built + tested; 4 review fixes + security review left |
 | 4 | Coach AI, profile, notifications, PWA, full E2E, README, final review | ⬜ Not started |
 
 Status legend: ⬜ not started · 🟨 in progress · ✅ done
@@ -37,11 +37,11 @@ Status legend: ⬜ not started · 🟨 in progress · ✅ done
 | `providers/onboarding_provider.dart` | `features/onboarding/store/onboardingStore.ts` + `hooks/useOnboardingFlow.ts` | ✅ |
 | `screens/home_screen.dart` (bottom tabs) | `app/layout/AppShell.tsx` + `BottomNav.tsx`, tabs in `app/router/tabs.ts` | ✅ |
 | `screens/tabs/dashboard_tab.dart` + `providers/dashboard_provider.dart` + `models/dashboard_model.dart` | `features/dashboard/pages/DashboardPage.tsx`, `components/*`, `api/useDashboardData.ts`, `utils/progress.ts` | ✅ |
-| `screens/tabs/food_log_tab.dart` | `features/food-log/pages/FoodLogPage.tsx` | ⬜ |
-| `screens/food_log/add_food_sheet.dart` (1005 lines → split) | `features/food-log/components/add-food/…` | ⬜ |
-| `screens/food_log/food_confirm_screen.dart` | `features/food-log/pages/FoodConfirmPage.tsx` | ⬜ |
-| `widgets/edit_food_item_sheet.dart` | `features/food-log/components/EditFoodItemSheet.tsx` (use `components/BottomSheet`) | ⬜ |
-| `widgets/ai_advice_sheet.dart` | `features/food-log/components/AiAdviceSheet.tsx` (use `components/BottomSheet`) | ⬜ |
+| `screens/tabs/food_log_tab.dart` | `features/food-log/pages/FoodLogPage.tsx` | ✅ |
+| `screens/food_log/add_food_sheet.dart` (1005 lines → split) | `features/food-log/components/add-food/…` + pages | ✅ |
+| `screens/food_log/food_confirm_screen.dart` | `features/food-log/pages/FoodConfirmPage.tsx` | ✅ |
+| `widgets/edit_food_item_sheet.dart` | `features/food-log/components/confirm/EditFoodItemSheet.tsx` | ✅ |
+| `widgets/ai_advice_sheet.dart` | `features/food-log/components/AiAdviceSheet.tsx` | ✅ |
 | `screens/tabs/coach_ai_tab.dart` | `features/coach/pages/CoachPage.tsx` | ⬜ |
 | `screens/tabs/profile_tab.dart` | `features/profile/pages/ProfilePage.tsx` | ⬜ |
 | `widgets/glass_card.dart` | `components/GlassCard` | ✅ |
@@ -249,21 +249,68 @@ cd frontend && npm install && npm run dev        # http://localhost:5173
 ### Checks (all must pass)
 
 ```
-cd backend  && venv\Scripts\python -m pytest          # 165 tests, SQLite, AI/USDA mocked
+cd backend  && venv\Scripts\python -m pytest          # 244 tests, SQLite, AI/USDA mocked
 cd frontend && npm run lint                            # ESLint (0 warnings) + Prettier
-cd frontend && npm run typecheck && npm test           # tsc -b ; Vitest (208 tests)
+cd frontend && npm run typecheck && npm test           # tsc -b ; Vitest (343 tests)
 cd frontend && npx playwright install chromium         # first time only
 cd frontend && npm run test:e2e                        # Playwright vs REAL backend (needs MySQL);
-                                                       # starts uvicorn + vite if not running
+                                                       # starts tests.e2e_server :8001 + vite :5174
 cd frontend && npm run build                           # production build + service worker
 ```
 
+## Session 3 summary (food log)
+
+**Done (all checks green at commit time):** backend 244 pytest, frontend 343 Vitest, ESLint/Prettier/tsc,
+`npm run build`, 6 Playwright E2E vs the real backend, axe WCAG 2.1 AA = 0 violations on every food-log
+screen at 360px in light + dark, no touch target < 44px, no horizontal overflow.
+
+- **Backend:** logic moved to `services/food_lookup_service.py` (text/barcode/image) and
+  `services/food_log_service.py` (submit/day/delete); router is HTTP only. Validated schemas in
+  `schemas/food_log.py` (meal/method enums, barcode `^\d{8,14}$`, query 1–500, quantity (0, 10000],
+  nutrient ranges, ≤ 50 items, log_date −366…+7 days, no NaN/inf). `utils/image_validation.py`:
+  base64 + magic-byte MIME check (JPEG/PNG/WebP) → 400 / 413 / 415 (a 413 used to be swallowed into 400).
+  Deleting someone else's item now answers **404** (was 403, same as missing). Last item deleted →
+  its meal is deleted; totals are recalculated from items. `/submit` is rate-limited (AI advice).
+  USDA outage → 503. AI lookups run USDA in parallel, max 10 AI items. Advice uses the logged day's
+  totals and the goal value (was `GoalType.X`). Gemini gets the real MIME type; LLM calls use `ainvoke`.
+  Barcode lookup prefers the result whose `gtinUpc` matches. New global 422 handler returns only
+  `loc/msg/type` (default echoed `input`, leaking passwords and crashing with 500 on NaN).
+  Tests: `tests/test_food_lookups.py`, `tests/test_food_log.py`; `rate_limited` fixture is in conftest.
+- **Frontend `features/food-log`:** FoodLogPage (header, 7-day strip `?date=`, calories card, meal
+  sections, remove dialog, AI advice sheet), AddFoodSheet + 3 method tiles (links), lazy pages
+  `addFoodScreens.ts`: TextSearchPage, BarcodeScanPage, PhotoLogPage, FoodConfirmPage (+ EditFoodItemSheet).
+  Model `model/foodItem.ts` ports food_item_model.dart (units, scaling). Meal + day travel in the URL;
+  chosen foods go to confirm as validated history state; after Log Meal the app goes back 2 entries
+  (Flutter popUntil) and `store/adviceStore.ts` shows the advice once. Submit/delete refetch the food
+  log and invalidate `['dashboard']`. Shared new component `components/Dialog`. `lib/platform/barcode`
+  (zxing 0.2.1, lazy chunk) adapter for Capacitor later; `lib/image/compressImage.ts` (1024px JPEG
+  0.8, strips EXIF). API client has a per-request `timeoutMs` (AI calls 60 s). Snackbar has a duration.
+- **E2E:** Playwright now starts `backend tests/e2e_server.py` on **:8001** (real app + MySQL, USDA/Groq/
+  Gemini replaced by fixed fakes) and Vite `--mode e2e` on **:5174** (`frontend/.env.e2e`); full Chromium
+  channel with a fake camera. Specs: `e2e/food-log.spec.ts` (text → confirm → log → dashboard → delete;
+  barcode camera allowed / blocked → manual entry). Helper `signUpAndOnboard` in `e2e/helpers.ts`.
+
+**Decisions (session 3):** photo source choice lives on the photo screen (browsers open the file/camera
+picker only from a direct tap); day logs always via `/history?log_date=` with the client's day (`/today`
+uses the server date); other users' items → 404; dark-mode gradient cards use black text (Flutter's white
+on #4DE082 ≈ 1.6:1); "Remaining" uses tertiary blue (#448AFF fails 4.5:1); empty meal kcal uses full
+secondary text (Flutter 50 % fails); "Discuss with Coach AI" navigates to `/coach` with
+`state.coachContext` (coach tab must read it in session 4); bell icon is decorative until notifications.
+
 ## Next step
 
-Start **Session 3** using Prompt 3 in `docs/MIGRATION_PROMPTS.md`: food logging (text / barcode /
-image, confirm, edit, AI advice, history, delete). Replace `app/placeholders/FoodLogPlaceholderPage.tsx`
-at `/food-log` (keep the route path), split `add_food_sheet.dart` into small components, use
-`components/BottomSheet`, and after a meal is logged invalidate `['dashboard']` queries so the
-dashboard updates. Move `food_log` router logic into a service with tests and add numeric ranges to
-the food-log request schemas. Test helpers to reuse: `test/dashboardHandlers.ts`, `test/renderStep.tsx`,
-fixtures in `test/fixtures.ts`, E2E helpers in `e2e/helpers.ts`.
+1. **Fix the /code-review findings (not done yet):**
+   - `hooks/useBarcodeScan.ts`: after a failed lookup keep `busyRef` true (only Retry/Rescan clears it);
+     now an unknown barcode is re-looked-up every second until 429.
+   - `schemas/foodLogSchemas.ts` `portionSchema`: require quantity ≥ 0.01 (0.004 rounds to 0 → backend 422).
+   - `hooks/useFoodConfirm.ts`: put the onSuccess (set advice + navigate) in `useMutation` options or block
+     Back while submitting (mutate-level callbacks don't run after unmount → meal saved, no feedback).
+   - Clear `useAdviceStore` on logout and session expiry (`features/auth/api/useAuthMutations.ts`).
+   - Nits: strip pydantic "Value error, " prefix in the 422 handler (`backend/app/main.py`); expand UPC-E
+     to UPC-A in `usda_client._barcode_match`; catch only `httpx.HTTPError`/`tenacity.RetryError` in
+     `food_lookup_service._from_usda`; add `max_length=MAX_BASE64_CHARS` to `ImageRequest.image_base64`.
+   Add a test for each, then run all checks (see "How to run").
+2. Run `/security-review` on the session-3 commits and fix findings.
+3. Then **Session 4** (Prompt 4 in `docs/MIGRATION_PROMPTS.md`): coach (read `state.coachContext`),
+   profile (Log out, goal actions), notifications (Flutter notifies when ≥ 2000 kcal after submit), PWA,
+   README. Known: main JS chunk is 507 kB (Vite warns at 500) — consider more lazy routes.
