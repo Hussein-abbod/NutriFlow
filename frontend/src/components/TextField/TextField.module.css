@@ -11,6 +11,7 @@
   --tf-label: var(--color-text-secondary);
   --tf-icon: var(--color-text-secondary);
   --tf-error-text: var(--color-error);
+  --tf-helper: var(--color-text-secondary);
 
   display: flex;
   flex-direction: column;
@@ -27,6 +28,7 @@
   --tf-label: rgb(255 255 255 / 0.7);
   --tf-icon: rgb(255 255 255 / 0.7);
   --tf-error-text: var(--brand-orange-200);
+  --tf-helper: var(--color-on-gradient-muted);
 }
 
 .control {
@@ -178,5 +180,11 @@
 .error {
   padding: 0 var(--space-4);
   color: var(--tf-error-text);
+  font: var(--font-body-sm);
+}
+
+.helper {
+  padding: 0 var(--space-4);
+  color: var(--tf-helper);
   font: var(--font-body-sm);
 }

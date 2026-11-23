@@ -68,3 +68,95 @@ export interface ValidationErrorItemDto {
 export interface ApiErrorBodyDto {
   detail?: string | ValidationErrorItemDto[];
 }
+
+export type Gender = 'male' | 'female';
+
+/** backend: schemas.onboarding.ProfileData */
+export interface OnboardingProfileRequestDto {
+  full_name: string;
+  age: number;
+  gender: Gender;
+  height_cm: number;
+  weight_kg: number;
+  activity_level: ActivityLevel;
+}
+
+/** backend: schemas.onboarding.GoalData */
+export interface OnboardingGoalRequestDto {
+  goal_type: GoalType;
+  target_weight_kg?: number;
+  goal_period_weeks?: number;
+}
+
+/** backend: schemas.onboarding.NutritionTargets */
+export interface NutritionTargetsDto {
+  daily_calories: number;
+  daily_protein: number;
+  daily_carbs: number;
+  daily_fat: number;
+}
+
+/** backend: schemas.onboarding.GoalResponse */
+export interface OnboardingGoalResponseDto {
+  is_feasible: boolean;
+  message: string;
+  suggested_weeks: number | null;
+  targets: NutritionTargetsDto | null;
+}
+
+/** backend: schemas.onboarding.AllergiesData */
+export interface OnboardingAllergiesRequestDto {
+  food_allergies: string[];
+}
+
+export type MealType = 'breakfast' | 'lunch' | 'snack' | 'dinner';
+
+/** backend: schemas.dashboard.MacroSummary */
+export interface MacroSummaryDto {
+  consumed: number;
+  target: number;
+}
+
+/** backend: schemas.dashboard.MealSummary */
+export interface MealSummaryDto {
+  calories: number;
+  target: number;
+}
+
+/** backend: schemas.dashboard.TodaySummaryOut */
+export interface TodaySummaryDto {
+  calories_consumed: number;
+  calories_target: number;
+  protein: MacroSummaryDto;
+  carbs: MacroSummaryDto;
+  fat: MacroSummaryDto;
+  meals: Partial<Record<MealType, MealSummaryDto>>;
+}
+
+/** backend: schemas.dashboard.DailyCalories (`date` is an ISO day, e.g. "2026-11-23") */
+export interface DailyCaloriesDto {
+  date: string;
+  calories: number;
+}
+
+/** backend: schemas.dashboard.GoalProgressOut */
+export interface GoalProgressDto {
+  has_active_goal: boolean;
+  goal_type: GoalType | '';
+  start_weight: number;
+  current_weight: number;
+  target_weight: number;
+  days_remaining: number;
+  start_date: string | null;
+  target_date: string | null;
+}
+
+/** backend: schemas.dashboard.ExtendGoalRequest */
+export interface ExtendGoalRequestDto {
+  extra_weeks: number;
+}
+
+/** backend: schemas.dashboard.MessageOut */
+export interface MessageDto {
+  message: string;
+}

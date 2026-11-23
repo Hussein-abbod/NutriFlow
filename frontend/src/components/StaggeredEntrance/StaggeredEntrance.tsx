@@ -1,29 +1,52 @@
 import type { CSSProperties, ReactNode } from 'react';
-import { staggerTiming } from '@/lib/animation/stagger';
+import { intervalTiming, staggerTiming } from '@/lib/animation/stagger';
+import { cn } from '@/lib/utils/cn';
 import styles from './StaggeredEntrance.module.css';
 
-export interface StaggeredEntranceProps {
-  index: number;
+/** `NutriAnimations.stagger(index, total)` timing (auth screens). */
+interface StaggerTimingProps {
   total: number;
-  /** Length of the Flutter AnimationController driving the whole sequence. */
-  controllerMs: number;
-  children: ReactNode;
+  step?: never;
+  span?: never;
 }
 
-/** Fade + slide-up (Offset(0, 0.15)) entrance, like the `_buildAnimated` helpers in the auth screens. */
+/** `Interval(index * step, index * step + span)` timing (onboarding steps, dashboard). */
+interface IntervalTimingProps {
+  step: number;
+  span: number;
+  total?: never;
+}
+
+export type StaggeredEntranceProps = (StaggerTimingProps | IntervalTimingProps) & {
+  index: number;
+  /** Length of the Flutter AnimationController driving the whole sequence. */
+  controllerMs: number;
+  /** Start offset of the slide-up, in % of the item's height (Flutter `Offset(0, 0.15)`). */
+  slidePercent?: number;
+  className?: string;
+  children: ReactNode;
+};
+
+/** Fade + slide-up entrance, like the `_buildAnimated` helpers in the Flutter screens. */
 export function StaggeredEntrance({
   index,
-  total,
   controllerMs,
+  slidePercent = 15,
+  className,
   children,
+  ...timing
 }: StaggeredEntranceProps) {
-  const { delayMs, durationMs } = staggerTiming(index, { total, controllerMs });
+  const { delayMs, durationMs } =
+    timing.step !== undefined
+      ? intervalTiming(index, { step: timing.step, span: timing.span, controllerMs })
+      : staggerTiming(index, { total: timing.total, controllerMs });
   const style = {
     '--stagger-delay': `${delayMs}ms`,
     '--stagger-duration': `${durationMs}ms`,
+    '--stagger-offset': `${slidePercent}%`,
   } as CSSProperties;
   return (
-    <div className={styles.entrance} style={style}>
+    <div className={cn(styles.entrance, className)} style={style}>
       {children}
     </div>
   );

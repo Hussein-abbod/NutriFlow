@@ -35,3 +35,14 @@ describe('TextField', () => {
     expect(screen.getByLabelText('Password')).not.toHaveAttribute('aria-invalid');
   });
 });
+
+describe('TextField helper text', () => {
+  it('describes the input and is replaced by the error', () => {
+    const { rerender } = render(<TextField label="Other" helperText="Separate with commas" />);
+    expect(screen.getByLabelText('Other')).toHaveAccessibleDescription('Separate with commas');
+
+    rerender(<TextField label="Other" helperText="Separate with commas" error="Too long" />);
+    expect(screen.queryByText('Separate with commas')).not.toBeInTheDocument();
+    expect(screen.getByLabelText('Other')).toHaveAccessibleDescription('Too long');
+  });
+});

@@ -27,3 +27,27 @@ export function staggerTiming(
     durationMs: Math.round((end - start) * controllerMs),
   };
 }
+
+export interface IntervalOptions {
+  /** Start offset per item, as a fraction of the controller (e.g. 0.12). */
+  step: number;
+  /** Length of each item's interval, as a fraction of the controller (e.g. 0.5). */
+  span: number;
+  controllerMs: number;
+}
+
+/**
+ * The `Interval(index * step, index * step + span)` pattern used by the onboarding steps and
+ * the dashboard (`_buildAnimated` in step_basic_info.dart / dashboard_tab.dart).
+ */
+export function intervalTiming(
+  index: number,
+  { step, span, controllerMs }: IntervalOptions,
+): StaggerTiming {
+  const start = clamp01(index * step);
+  const end = clamp01(start + span);
+  return {
+    delayMs: Math.round(start * controllerMs),
+    durationMs: Math.round((end - start) * controllerMs),
+  };
+}

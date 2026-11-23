@@ -1,8 +1,7 @@
 import type { FieldValues, Path, UseFormSetError } from 'react-hook-form';
 import { showSnackbar } from '@/components/Snackbar/snackbarStore';
 import { ApiError } from '@/lib/api/ApiError';
-
-const UNKNOWN_ERROR = 'Something went wrong. Please try again.';
+import { UNKNOWN_ERROR_MESSAGE } from '@/lib/api/errorMessage';
 
 /**
  * Show a failed form submission to the user: backend field errors (422) go inline on the
@@ -26,5 +25,5 @@ export function reportFormError<TValues extends FieldValues>(
     if (!appliedInline) showSnackbar(error.message, 'error');
     return;
   }
-  showSnackbar(UNKNOWN_ERROR, 'error');
+  showSnackbar(UNKNOWN_ERROR_MESSAGE, 'error');
 }

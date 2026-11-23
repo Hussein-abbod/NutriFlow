@@ -16,18 +16,36 @@ export interface TextFieldProps extends Omit<InputHTMLAttributes<HTMLInputElemen
   endAdornment?: ReactNode;
   /** `glass` = white-on-gradient style used by the auth / onboarding screens. */
   variant?: TextFieldVariant;
+  /** Hint shown under the field (Flutter `helperText`); hidden while an error is shown. */
+  helperText?: string;
 }
 
 /** Outlined, filled text field with a floating label (Flutter InputDecoration). */
 export const TextField = forwardRef<HTMLInputElement, TextFieldProps>(function TextField(
-  { label, error, icon, endAdornment, variant = 'default', id, className, ...inputProps },
+  {
+    label,
+    error,
+    icon,
+    endAdornment,
+    variant = 'default',
+    helperText,
+    id,
+    className,
+    ...inputProps
+  },
   ref,
 ) {
   const generatedId = useId();
   const inputId = id ?? generatedId;
   const errorId = `${inputId}-error`;
+  const helperId = `${inputId}-helper`;
+  const showHelper = Boolean(helperText) && !error;
   const hasSuffix = endAdornment !== undefined && endAdornment !== null;
-  const describedBy = [inputProps['aria-describedby'], error ? errorId : undefined]
+  const describedBy = [
+    inputProps['aria-describedby'],
+    error ? errorId : undefined,
+    showHelper ? helperId : undefined,
+  ]
     .filter(Boolean)
     .join(' ');
 
@@ -57,6 +75,11 @@ export const TextField = forwardRef<HTMLInputElement, TextFieldProps>(function T
       {error && (
         <p id={errorId} className={styles.error} role="alert">
           {error}
+        </p>
+      )}
+      {showHelper && (
+        <p id={helperId} className={styles.helper}>
+          {helperText}
         </p>
       )}
     </div>

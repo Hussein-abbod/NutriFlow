@@ -84,6 +84,28 @@
   --color-onboarding-welcome: #1b5e20; /* first gradient colour = white-button text colour */
   --gradient-ring-start: #006d36;
   --gradient-ring-end: #00956a;
+  /* Onboarding white-button text = first colour of each step gradient */
+  --color-onboarding-basic-info: #0d47a1;
+  --color-onboarding-activity: #4a148c;
+  --color-onboarding-goal: #00695c;
+  --color-onboarding-allergies: #00695c;
+  --color-onboarding-summary: #1b5e20;
+  /* Small secondary text on onboarding gradients. Flutter uses white 50–70 %, which is below
+     WCAG AA on the teal/blue steps; 90 % passes (≥ 4.5:1) on every step gradient. */
+  --color-on-gradient-muted: rgb(255 255 255 / 0.9);
+
+  /* ── Nutrition colours (step_summary.dart / dashboard_tab.dart) ── */
+  --color-macro-protein: #448aff; /* dashboard */
+  --color-macro-protein-light: #64b5f6; /* onboarding summary (on gradient) */
+  --color-macro-carbs: #ffb74d;
+  --color-macro-fat: #ce93d8;
+  --brand-coral-strong: #e53935; /* over-target bar gradient end */
+  --color-over-target: #ba1a1a; /* NutriFlowTheme.coral */
+  --color-progress-track: #f5f5f5; /* Colors.grey.shade100 */
+  --color-ring-track-soft: #f5f5f5;
+  --color-chart-tooltip: #455a64; /* fl_chart default tooltip (blueGrey.darken(15)) */
+  --shadow-card-summary: 0 4px 12px rgb(0 0 0 / 0.03);
+  --shadow-card-soft: 0 2px 8px rgb(0 0 0 / 0.02);
 
   /* ── Typography (Inter, Material 3 scale from _textTheme) ── */
   --font-family: 'Inter Variable', Inter, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
@@ -226,5 +248,11 @@
     --gradient-auth: linear-gradient(to bottom right, #0d1b0f, #0a1628);
 
     --shadow-glass: 0 8px 24px rgb(0 0 0 / 0.3);
+    --color-progress-track: rgb(255 255 255 / 0.08);
+    --color-ring-track-soft: rgb(255 255 255 / 0.06);
+    /* #BA1A1A is unreadable on the dark card; the dark error red keeps the meaning */
+    --color-over-target: #ff5252;
+    --shadow-card-summary: 0 4px 12px rgb(0 0 0 / 0.08);
+    --shadow-card-soft: 0 2px 8px rgb(0 0 0 / 0.06);
   }
 }
