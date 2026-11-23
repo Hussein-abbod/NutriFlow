@@ -1,28 +1,22 @@
 import { expect, test } from '@playwright/test';
+import { logIn, signUp, uniqueEmail } from './helpers';
 
-/** Real backend: every run registers a brand-new user. */
-const uniqueEmail = () => `e2e-${Date.now()}-${Math.floor(Math.random() * 1e6)}@example.com`;
-const PASSWORD = 'E2e-Str0ng-Pass!';
-
-test('register, restore the session on reload, log out and log back in', async ({ page }) => {
+test('register, restore the session on reload, and log in from a new browser', async ({
+  page,
+  browser,
+}) => {
   const email = uniqueEmail();
 
   // Splash → login (no session yet)
   await page.goto('/');
   await expect(page.getByRole('heading', { name: 'Welcome Back' })).toBeVisible();
-
-  // Sign up
   await page.getByRole('link', { name: /Sign Up/ }).click();
-  await expect(page.getByRole('heading', { name: 'Create Account' })).toBeVisible();
-  await page.getByLabel('Full Name', { exact: true }).fill('E2E Tester');
-  await page.getByLabel('Email', { exact: true }).fill(email);
-  await page.getByLabel('Password', { exact: true }).fill(PASSWORD);
-  await page.getByLabel('Confirm Password', { exact: true }).fill(PASSWORD);
-  await page.getByRole('button', { name: 'Sign Up' }).click();
+  await expect(page).toHaveURL(/\/register$/);
 
-  // New account → onboarding
+  // Sign up → onboarding continues with basic info (as in Flutter)
+  await signUp(page, { name: 'E2E Tester', email });
   await expect(page).toHaveURL(/\/onboarding$/);
-  await expect(page.getByText('Hi, E2E Tester')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Basic Information' })).toBeVisible();
 
   // The refresh token is an httpOnly cookie, invisible to JavaScript…
   const cookies = await page.context().cookies('http://localhost:8000/auth');
@@ -34,26 +28,21 @@ test('register, restore the session on reload, log out and log back in', async (
   // …and restores the session after a full reload (access token was only in memory).
   await page.reload();
   await expect(page).toHaveURL(/\/onboarding$/);
-  await expect(page.getByText('Hi, E2E Tester')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Welcome back, E2E Tester!' })).toBeVisible();
 
-  // Log out → login
-  await page.getByRole('button', { name: 'Log out' }).click();
-  await expect(page).toHaveURL(/\/login$/);
-
-  // Wrong password → server error snackbar
-  await page.getByLabel('Email', { exact: true }).fill(email);
-  await page.getByLabel('Password', { exact: true }).fill('Wrong-Pass-123');
-  await page.getByRole('button', { name: 'Login' }).click();
-  await expect(page.getByRole('alert')).toHaveText('Invalid email or password.');
-
-  // Correct password → back to onboarding
-  await page.getByLabel('Password', { exact: true }).fill(PASSWORD);
-  await page.getByRole('button', { name: 'Login' }).click();
-  await expect(page).toHaveURL(/\/onboarding$/);
-  await expect(page.getByText('Hi, E2E Tester')).toBeVisible();
+  // A fresh browser has no session: wrong password → snackbar, right password → onboarding.
+  const other = await browser.newContext();
+  const otherPage = await other.newPage();
+  await otherPage.goto('/login');
+  await logIn(otherPage, email, 'Wrong-Pass-123');
+  await expect(otherPage.getByRole('alert')).toHaveText('Invalid email or password.');
+  await logIn(otherPage, email);
+  await expect(otherPage).toHaveURL(/\/onboarding$/);
+  await expect(otherPage.getByRole('heading', { name: 'Welcome back, E2E Tester!' })).toBeVisible();
+  await other.close();
 });
 
 test('protected routes redirect to login without a session', async ({ page }) => {
-  await page.goto('/home');
+  await page.goto('/dashboard');
   await expect(page).toHaveURL(/\/login$/);
 });
