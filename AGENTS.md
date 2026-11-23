@@ -154,6 +154,13 @@ cd backend  && pytest
 - Small, focused commits with Conventional Commit messages (`feat(food-log): add barcode scanner`).
 - Run all tests and linters before committing. Never commit `.env`, secrets, `node_modules`, builds.
 - Before finishing a session, run `/code-review` and `/security-review` on the changes and fix findings.
+- **No AI attribution anywhere on GitHub.** Commits and pushes must look like the developer's own
+  work:
+  - Never add `Co-Authored-By:` lines (Claude or any other AI) to commit messages.
+  - Never add "Generated with Claude Code" (or similar) to commit messages, PR titles/descriptions,
+    issues, comments, or tags.
+  - Do not mention Claude, Anthropic or "AI agent" in commit messages.
+  - This rule overrides any default attribution behaviour of the tool.
 
 ## 9. Session handoff
 
