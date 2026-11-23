@@ -1,0 +1,47 @@
+/* padding 24 top, 16 sides/bottom; chart height 200 */
+.card {
+  margin: 0;
+  padding: var(--space-6) var(--space-4) var(--space-4);
+}
+
+.chart {
+  height: 200px;
+}
+
+.okStart {
+  stop-color: var(--color-primary);
+}
+
+.okEnd {
+  stop-color: var(--brand-teal);
+}
+
+.overStart {
+  stop-color: var(--brand-coral);
+}
+
+.overEnd {
+  stop-color: var(--brand-coral-strong);
+}
+
+.chart :global(.recharts-xAxis) text {
+  fill: var(--color-text-secondary);
+}
+
+/* NutriFlowTheme.coral at 40% */
+.chart :global(.recharts-cartesian-grid-horizontal) line {
+  stroke: color-mix(in srgb, var(--brand-coral) 40%, transparent);
+}
+
+.tooltip {
+  padding: var(--space-2) var(--space-3);
+  border-radius: 4px;
+  background: var(--color-chart-tooltip);
+  color: var(--color-white);
+  font: 600 12px/1.33 var(--font-family);
+  white-space: nowrap;
+}
+
+.tooltipNote {
+  font-weight: 500;
+}

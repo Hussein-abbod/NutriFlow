@@ -1,0 +1,49 @@
+/* padding 14, radius 16, aspect ratio 1.25 (GridView childAspectRatio) */
+.card {
+  --meal-color: var(--color-primary);
+
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  aspect-ratio: 1.25;
+  min-width: 0;
+  padding: 14px;
+  border: 1px solid var(--color-card-border);
+  border-radius: var(--radius-button);
+  background: var(--color-card);
+  box-shadow: var(--shadow-card-soft);
+}
+
+.over {
+  --meal-color: var(--color-over-target);
+}
+
+.name {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-text);
+  font: 700 14px/1.43 var(--font-family);
+}
+
+.icon {
+  flex: none;
+  color: var(--meal-color);
+}
+
+.values {
+  min-width: 0;
+}
+
+.calories {
+  overflow: hidden;
+  color: var(--meal-color);
+  font: 800 20px/1.25 var(--font-family);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.target {
+  color: var(--color-text-secondary);
+  font: 400 11px/1.45 var(--font-family);
+}

@@ -1,0 +1,23 @@
+/* cardBackground(), radius 20, 1px outlineVariant border, soft shadow (dashboard_tab.dart) */
+.card {
+  border: 1px solid var(--color-card-border);
+  border-radius: var(--radius-card);
+  background: var(--color-card);
+  box-shadow: var(--shadow-card-soft);
+  color: var(--color-text);
+}
+
+.summary {
+  padding: var(--space-6);
+  box-shadow: var(--shadow-card-summary);
+}
+
+.padded {
+  padding: var(--space-6);
+}
+
+.message {
+  color: var(--color-text-secondary);
+  font: var(--font-body-md);
+  text-align: center;
+}

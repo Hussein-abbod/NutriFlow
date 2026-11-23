@@ -1,0 +1,15 @@
+.header {
+  padding: calc(var(--space-4) + var(--safe-top)) var(--space-6) var(--space-5);
+}
+
+.eyebrow {
+  color: var(--color-text-secondary);
+  font: 400 14px/1.43 var(--font-family);
+}
+
+.title {
+  margin-top: var(--space-1);
+  color: var(--color-on-surface);
+  font: 700 26px/1.25 var(--font-family);
+  letter-spacing: -0.5px;
+}

@@ -1,0 +1,57 @@
+.macro {
+  min-width: 0;
+}
+
+.protein {
+  --macro-color: var(--color-macro-protein);
+}
+
+.carbs {
+  --macro-color: var(--color-macro-carbs);
+}
+
+.fat {
+  --macro-color: var(--color-macro-fat);
+}
+
+.label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  font: 600 12px/1.33 var(--font-family);
+}
+
+.label > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.icon {
+  flex: none;
+  color: var(--macro-color);
+}
+
+.track {
+  height: 6px;
+  margin-top: 6px;
+  overflow: hidden;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--macro-color) 10%, transparent);
+}
+
+.fill {
+  height: 100%;
+  border-radius: inherit;
+  background: var(--macro-color);
+  transition: width var(--duration-ring) var(--ease-smooth-decelerate);
+}
+
+.amount {
+  margin-top: var(--space-1);
+  overflow: hidden;
+  color: var(--color-text-secondary);
+  font: 400 10px/1.4 var(--font-family);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
