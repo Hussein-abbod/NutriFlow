@@ -118,9 +118,9 @@ def validate_goal_feasibility(
     """
     Check whether the user's goal is safe and realistic.
 
-    Safety limits:
-    - Maximum safe weight loss: 1 kg per week
-    - Maximum safe weight gain: 0.5 kg per week
+    Safety limits (see the constants above):
+    - Maximum safe weight loss: MAX_SAFE_WEIGHT_LOSS_KG_PER_WEEK
+    - Maximum safe weight gain: MAX_SAFE_WEIGHT_GAIN_KG_PER_WEEK
     """
     weight_diff = target_weight_kg - current_weight_kg
     abs_diff = abs(weight_diff)

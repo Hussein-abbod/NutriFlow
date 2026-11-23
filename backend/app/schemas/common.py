@@ -32,7 +32,11 @@ AllergyName = Annotated[str, StringConstraints(strip_whitespace=True, min_length
 
 AllergyList = Annotated[list[AllergyName], Field(max_length=MAX_ALLERGIES)]
 
-# Same ranges as the onboarding form (Flutter + React).
-Age = Annotated[int, Field(ge=10, le=100)]
-HeightCm = Annotated[float, Field(gt=0, le=300)]
-WeightKg = Annotated[float, Field(gt=0, le=500)]
+# Realistic body ranges, shared with the React onboarding form (features/onboarding/schemas).
+AGE_MIN, AGE_MAX = 10, 100
+HEIGHT_MIN_CM, HEIGHT_MAX_CM = 50, 300
+WEIGHT_MIN_KG, WEIGHT_MAX_KG = 20, 500
+
+Age = Annotated[int, Field(ge=AGE_MIN, le=AGE_MAX)]
+HeightCm = Annotated[float, Field(ge=HEIGHT_MIN_CM, le=HEIGHT_MAX_CM)]
+WeightKg = Annotated[float, Field(ge=WEIGHT_MIN_KG, le=WEIGHT_MAX_KG)]

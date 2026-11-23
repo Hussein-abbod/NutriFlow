@@ -30,6 +30,18 @@ def _bad_request(detail: str) -> HTTPException:
     return HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=detail)
 
 
+def _check_goal_direction(goal_type: GoalType, current_kg: float, target_kg: float) -> None:
+    """A lose goal needs a lower target, a gain goal a higher one."""
+    if goal_type == GoalType.LOSE_WEIGHT and target_kg >= current_kg:
+        raise _bad_request(
+            f"To lose weight, your target must be below your current weight ({current_kg:g} kg)."
+        )
+    if goal_type == GoalType.GAIN_WEIGHT and target_kg <= current_kg:
+        raise _bad_request(
+            f"To gain weight, your target must be above your current weight ({current_kg:g} kg)."
+        )
+
+
 def _apply_plan(user: User, plan: NutritionPlan) -> NutritionTargets:
     user.daily_calories_target = plan.daily_calories
     user.daily_protein_target = plan.daily_protein
@@ -85,6 +97,7 @@ def save_goal(db: Session, user: User, data: GoalData) -> GoalResponse:
 
     if not data.target_weight_kg or not data.goal_period_weeks:
         raise _bad_request("Target weight and goal period are required for gain/lose goals.")
+    _check_goal_direction(data.goal_type, user.weight_kg, data.target_weight_kg)
 
     validation = validate_goal_feasibility(
         current_weight_kg=user.weight_kg,

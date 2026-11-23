@@ -38,7 +38,7 @@ class ProfileData(BaseModel):
 class GoalData(BaseModel):
     """Step 4: Goal selection."""
     goal_type: GoalType
-    target_weight_kg: Optional[float] = Field(None, gt=0, le=500)
+    target_weight_kg: Optional[WeightKg] = None
     goal_period_weeks: Optional[int] = Field(None, ge=1, le=104)
 
 

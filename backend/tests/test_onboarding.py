@@ -67,6 +67,51 @@ def test_unsafe_goal_is_reported_not_saved(client, auth_headers):
     assert client.get("/auth/me", headers=auth_headers).json()["goal_type"] is None
 
 
+@pytest.mark.parametrize(
+    "payload",
+    [
+        {"goal_type": "lose_weight", "target_weight_kg": 75, "goal_period_weeks": 10},
+        {"goal_type": "lose_weight", "target_weight_kg": 70, "goal_period_weeks": 10},
+        {"goal_type": "gain_weight", "target_weight_kg": 65, "goal_period_weeks": 10},
+        {"goal_type": "gain_weight", "target_weight_kg": 70, "goal_period_weeks": 10},
+    ],
+)
+def test_goal_in_the_wrong_direction_is_rejected(client, auth_headers, payload):
+    client.post("/onboarding/profile", json=VALID_PROFILE, headers=auth_headers)
+    response = client.post("/onboarding/goal", json=payload, headers=auth_headers)
+    assert response.status_code == 400
+    assert "current weight (70 kg)" in response.json()["detail"]
+
+
+def test_gain_goal_targets_add_a_surplus(client, auth_headers):
+    client.post("/onboarding/profile", json=VALID_PROFILE, headers=auth_headers)
+    maintain = client.post("/onboarding/goal", json={"goal_type": "maintain_weight"}, headers=auth_headers)
+    gain = client.post(
+        "/onboarding/goal",
+        json={"goal_type": "gain_weight", "target_weight_kg": 74, "goal_period_weeks": 8},
+        headers=auth_headers,
+    )
+    assert gain.json()["is_feasible"] is True
+    # 4 kg over 8 weeks = 0.5 kg/week = +550 kcal/day
+    surplus = gain.json()["targets"]["daily_calories"] - maintain.json()["targets"]["daily_calories"]
+    assert surplus == pytest.approx(550, abs=0.01)
+
+
+def test_goal_response_matches_the_calculator(client, auth_headers):
+    client.post("/onboarding/profile", json=VALID_PROFILE, headers=auth_headers)
+    targets = client.post("/onboarding/goal", json=LOSE_GOAL, headers=auth_headers).json()["targets"]
+    assert targets == {
+        "daily_calories": 1651.39,
+        "daily_protein": 140,
+        "daily_carbs": 169.64,
+        "daily_fat": 45.87,
+    }
+    me = client.get("/auth/me", headers=auth_headers).json()
+    assert me["daily_calories_target"] == 1651.39
+    assert me["goal_weight_kg"] == 65
+    assert me["goal_period_weeks"] == 10
+
+
 def test_complete_before_steps_is_rejected(client, auth_headers):
     assert client.post("/onboarding/complete", headers=auth_headers).status_code == 400
 
@@ -84,7 +129,11 @@ def test_completing_twice_keeps_a_single_active_goal(client, onboarded_headers, 
         {"age": 101},
         {"gender": "other"},
         {"height_cm": 0},
+        {"height_cm": 49.9},
+        {"height_cm": 300.1},
+        {"weight_kg": 19.9},
         {"weight_kg": 600},
+        {"age": 30.5},
         {"full_name": " "},
         {"activity_level": "couch"},
     ],
@@ -99,6 +148,7 @@ def test_profile_validation(client, auth_headers, override):
     [
         {"goal_type": "get_huge"},
         {"goal_type": "lose_weight", "target_weight_kg": 0, "goal_period_weeks": 10},
+        {"goal_type": "lose_weight", "target_weight_kg": 19, "goal_period_weeks": 10},
         {"goal_type": "lose_weight", "target_weight_kg": 60, "goal_period_weeks": 0},
         {"goal_type": "lose_weight", "target_weight_kg": 60, "goal_period_weeks": 105},
     ],
