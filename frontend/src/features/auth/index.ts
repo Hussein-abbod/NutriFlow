@@ -1,4 +1,4 @@
-export { useCurrentUser } from './api/useCurrentUser';
+export { useCurrentUser, useRefreshCurrentUser, useSetCurrentUser } from './api/useCurrentUser';
 export { useLogin, useLogout, useRegister } from './api/useAuthMutations';
 export { useSessionExpiryHandler } from './hooks/useSessionExpiryHandler';
 export { LoginPage } from './pages/LoginPage';

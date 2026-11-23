@@ -1,7 +1,11 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { Button, GlassCard, Icon, PasswordField, StaggeredEntrance, TextField } from '@/components';
-import { OnboardingStepIndicator, ONBOARDING_STEP_COUNT } from '@/features/onboarding';
+import {
+  OnboardingStepIndicator,
+  ONBOARDING_STEP_COUNT,
+  startAfterSignUp,
+} from '@/features/onboarding';
 import { reportFormError } from '@/lib/forms/reportFormError';
 import { useRegister } from '../api/useAuthMutations';
 import { AuthHeader } from '../components/AuthHeader';
@@ -18,7 +22,8 @@ const ENTRANCE = { total: 3, controllerMs: 900 } as const;
 
 /** onboarding/step_welcome.dart — "Create Account", step 1 of the onboarding flow. */
 export function RegisterPage() {
-  const signUp = useRegister();
+  // Like Flutter, a successful sign-up moves straight on to "Basic Information".
+  const signUp = useRegister({ onRegistered: startAfterSignUp });
   const {
     register,
     handleSubmit,

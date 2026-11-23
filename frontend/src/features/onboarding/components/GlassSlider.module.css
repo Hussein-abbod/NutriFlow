@@ -1,0 +1,64 @@
+.slider {
+  --track: linear-gradient(
+    to right,
+    var(--color-white) var(--slider-fill),
+    rgb(255 255 255 / 0.2) var(--slider-fill)
+  );
+
+  width: 100%;
+  height: var(--tap-target);
+  margin: 0;
+  background: transparent;
+  cursor: pointer;
+  appearance: none;
+}
+
+.slider::-webkit-slider-runnable-track {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--track);
+}
+
+.slider::-moz-range-track {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--track);
+}
+
+.slider::-webkit-slider-thumb {
+  width: 20px;
+  height: 20px;
+  margin-top: -7px;
+  border: 0;
+  border-radius: var(--radius-full);
+  background: var(--color-white);
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.25);
+  appearance: none;
+  transition: box-shadow var(--duration-fast) var(--ease-in-out);
+}
+
+.slider::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border: 0;
+  border-radius: var(--radius-full);
+  background: var(--color-white);
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.25);
+}
+
+/* Material overlay (white 10%) on press, and a visible ring for keyboard focus */
+.slider:active::-webkit-slider-thumb {
+  box-shadow: 0 0 0 12px rgb(255 255 255 / 0.1);
+}
+
+.slider:focus-visible {
+  outline: none;
+}
+
+.slider:focus-visible::-webkit-slider-thumb {
+  box-shadow: 0 0 0 4px rgb(255 255 255 / 0.45);
+}
+
+.slider:focus-visible::-moz-range-thumb {
+  box-shadow: 0 0 0 4px rgb(255 255 255 / 0.45);
+}

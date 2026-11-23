@@ -1,0 +1,44 @@
+.background {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+}
+
+.layer {
+  position: absolute;
+  inset: 0;
+}
+
+.entering {
+  animation: fade-in var(--duration-slow) var(--ease-in-out) both;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+.welcome {
+  background: var(--gradient-onboarding-welcome);
+}
+
+.basic-info {
+  background: var(--gradient-onboarding-basic-info);
+}
+
+.activity {
+  background: var(--gradient-onboarding-activity);
+}
+
+.goal {
+  background: var(--gradient-onboarding-goal);
+}
+
+.allergies {
+  background: var(--gradient-onboarding-allergies);
+}
+
+.summary {
+  background: var(--gradient-onboarding-summary);
+}

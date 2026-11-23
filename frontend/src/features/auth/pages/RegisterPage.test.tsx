@@ -87,6 +87,8 @@ describe('RegisterPage', () => {
       email: 'alice@example.com',
       password: 'Str0ngPass!',
     });
+    // Like Flutter, a new account skips "Welcome back" and continues with basic info.
+    expect(await screen.findByRole('heading', { name: 'Basic Information' })).toBeInTheDocument();
   });
 
   it('shows a duplicate-email error from the server', async () => {

@@ -1,0 +1,73 @@
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+/* TweenAnimationBuilder: 400 + index * 100 ms, easeOutCubic, Offset(0, 20 * (1 - t)) */
+.rise {
+  animation: rise var(--rise-duration) var(--ease-smooth-decelerate) both;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+}
+
+.iconBubble {
+  display: grid;
+  flex: none;
+  place-items: center;
+  padding: var(--space-3);
+  border-radius: var(--radius-full);
+  background: rgb(255 255 255 / 0.08);
+  transition: background-color 300ms var(--ease-smooth-decelerate);
+}
+
+.iconBubbleSelected {
+  background: rgb(255 255 255 / 0.25);
+  color: var(--color-white);
+}
+
+.text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.title {
+  font: 700 16px/1.375 var(--font-family);
+}
+
+.titleSelected {
+  color: var(--color-white);
+}
+
+.subtitle {
+  color: var(--color-on-gradient-muted);
+  font: 400 13px/1.4 var(--font-family);
+}
+
+/* 24px radio dot: white 30% ring → filled white with a purple check */
+.radio {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border: 2px solid rgb(255 255 255 / 0.3);
+  border-radius: var(--radius-full);
+  color: var(--color-onboarding-activity);
+  transition:
+    background-color 250ms var(--ease-in-out),
+    border-color 250ms var(--ease-in-out);
+}
+
+.radioSelected {
+  border-color: var(--color-white);
+  background: var(--color-white);
+}

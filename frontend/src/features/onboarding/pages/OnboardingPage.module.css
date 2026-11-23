@@ -1,0 +1,30 @@
+.page {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  padding: var(--safe-top) var(--safe-right) var(--safe-bottom) var(--safe-left);
+  color: var(--color-white);
+}
+
+/* The white Next button takes the first colour of the step gradient. */
+.page[data-step='basic-info'] {
+  --button-light-color: var(--color-onboarding-basic-info);
+}
+
+.page[data-step='activity'] {
+  --button-light-color: var(--color-onboarding-activity);
+}
+
+.page[data-step='goal'] {
+  --button-light-color: var(--color-onboarding-goal);
+}
+
+.page[data-step='allergies'] {
+  --button-light-color: var(--color-onboarding-allergies);
+}
+
+.page[data-step='summary'] {
+  --button-light-color: var(--color-onboarding-summary);
+}

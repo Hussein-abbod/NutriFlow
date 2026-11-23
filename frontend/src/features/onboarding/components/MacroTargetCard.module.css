@@ -1,0 +1,35 @@
+.card {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  min-width: 0;
+  text-align: center;
+}
+
+.icon {
+  margin-bottom: var(--space-2);
+}
+
+.protein {
+  color: var(--color-macro-protein-light);
+}
+
+.carbs {
+  color: var(--color-macro-carbs);
+}
+
+.fat {
+  color: var(--color-macro-fat);
+}
+
+.amount {
+  color: var(--color-white);
+  font: 800 18px/1.33 var(--font-family);
+}
+
+.title {
+  margin-top: var(--space-1);
+  color: var(--color-on-gradient-muted);
+  font: 500 12px/1.33 var(--font-family);
+}

@@ -1,0 +1,17 @@
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.chipLabel {
+  font: 500 14px/1.43 var(--font-family);
+}
+
+.none {
+  margin-top: var(--space-4);
+}
+
+.other {
+  margin-top: var(--space-6);
+}

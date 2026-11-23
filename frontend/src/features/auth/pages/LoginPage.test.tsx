@@ -67,14 +67,14 @@ describe('LoginPage', () => {
     expect(body).toEqual({ email: 'alice@example.com', password: 'Str0ngPass!' });
   });
 
-  it('routes an onboarded user home', async () => {
+  it('routes an onboarded user to the app (first tab)', async () => {
     server.use(
       http.post(`${TEST_API}/auth/login`, () => HttpResponse.json(buildTokens())),
       meHandler(buildUser({ is_profile_complete: true })),
     );
     const { router } = await openLogin();
     await fillAndSubmit('alice@example.com', 'Str0ngPass!');
-    await waitFor(() => expect(router.state.location.pathname).toBe('/home'));
+    await waitFor(() => expect(router.state.location.pathname).toBe('/food-log'));
   });
 
   it('shows the server error in a snackbar and stays on the page', async () => {

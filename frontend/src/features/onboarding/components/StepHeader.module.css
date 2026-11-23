@@ -1,0 +1,35 @@
+.header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  color: var(--color-white);
+}
+
+.badge {
+  display: grid;
+  place-items: center;
+  padding: 14px;
+  border-radius: var(--radius-full);
+  background: rgb(255 255 255 / 0.12);
+}
+
+.badgeLarge {
+  padding: var(--space-4);
+}
+
+/* headlineMedium (28) with fontWeight w800 */
+.title {
+  margin-top: var(--space-4);
+  font: 800 28px/1.29 var(--font-family);
+}
+
+.title:focus {
+  outline: none;
+}
+
+.subtitle {
+  margin-top: var(--space-2);
+  color: var(--color-on-gradient-muted);
+  font: var(--font-body-md);
+}

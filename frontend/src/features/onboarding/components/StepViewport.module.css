@@ -1,0 +1,64 @@
+.viewport {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.slot {
+  position: absolute;
+  inset: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+/* animateToPage(500ms, Curves.easeOutCubic) */
+.enter-forward,
+.enter-back,
+.leave-forward,
+.leave-back {
+  animation-duration: 500ms;
+  animation-timing-function: var(--ease-smooth-decelerate);
+  animation-fill-mode: both;
+}
+
+.enter-forward {
+  animation-name: from-right;
+}
+
+.leave-forward {
+  animation-name: to-left;
+}
+
+.enter-back {
+  animation-name: from-left;
+}
+
+.leave-back {
+  animation-name: to-right;
+}
+
+@keyframes from-right {
+  from {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes from-left {
+  from {
+    transform: translateX(-100%);
+  }
+}
+
+@keyframes to-left {
+  to {
+    transform: translateX(-100%);
+  }
+}
+
+@keyframes to-right {
+  to {
+    transform: translateX(100%);
+  }
+}

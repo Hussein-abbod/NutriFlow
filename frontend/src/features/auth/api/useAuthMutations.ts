@@ -36,14 +36,22 @@ export function useLogin() {
   });
 }
 
-export function useRegister() {
+export interface UseRegisterOptions {
+  /** Runs before the session starts (and the route guard leaves the sign-up page). */
+  onRegistered?: (user: UserDto) => void;
+}
+
+export function useRegister({ onRegistered }: UseRegisterOptions = {}) {
   const onSessionStarted = useSessionStarted();
   return useMutation({
     mutationFn: async (payload: RegisterRequestDto) => {
       const response = await authApi.register(payload);
       return startSession(response.access_token);
     },
-    onSuccess: onSessionStarted,
+    onSuccess: (user) => {
+      onRegistered?.(user);
+      onSessionStarted(user);
+    },
   });
 }
 

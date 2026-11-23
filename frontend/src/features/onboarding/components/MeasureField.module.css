@@ -1,0 +1,57 @@
+/* filled: white 8%, OutlineInputBorder(radius 14, BorderSide.none) */
+.control {
+  display: flex;
+  align-items: center;
+  border-radius: 14px;
+  background: rgb(255 255 255 / 0.08);
+  transition: box-shadow var(--duration-fast) var(--ease-in-out);
+}
+
+/* Flutter shows no border; a white ring keeps keyboard focus visible. */
+.control:focus-within {
+  box-shadow: inset 0 0 0 2px var(--color-white);
+}
+
+.invalid,
+.invalid:focus-within {
+  box-shadow: inset 0 0 0 2px var(--brand-orange-200);
+}
+
+.input {
+  flex: 1;
+  min-width: 0;
+  min-height: var(--tap-target);
+  padding: var(--space-3);
+  border: 0;
+  background: transparent;
+  color: var(--color-white);
+  font: 400 16px/1.5 var(--font-family);
+  outline: none;
+  caret-color: var(--color-white);
+}
+
+.large {
+  font: 600 18px/1.33 var(--font-family);
+}
+
+.suffix {
+  padding-right: var(--space-3);
+  color: var(--color-on-gradient-muted);
+  font: var(--font-body-lg);
+}
+
+.error {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin-top: var(--space-1);
+  padding: 0 var(--space-1);
+  color: var(--color-white);
+  font: 500 12px/1.4 var(--font-family);
+}
+
+/* White text + orange icon/ring: orange text alone fails contrast on the lighter gradients. */
+.errorIcon {
+  flex: none;
+  color: var(--brand-orange-200);
+}
