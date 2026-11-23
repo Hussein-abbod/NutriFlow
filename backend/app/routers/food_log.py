@@ -16,10 +16,11 @@ import base64
 from datetime import date, datetime
 from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from sqlalchemy.orm import Session
 
 from app.database import get_db
+from app.limiter import AI_RATE_LIMIT, limiter
 from app.models.food_log import FoodLog, FoodLogItem, MealType, LogMethod
 from app.models.user import User
 from app.schemas.food_log import (
@@ -79,7 +80,9 @@ def _get_today_totals(user_id: int, db: Session) -> dict:
 # ─────────────────────────────────────────
 
 @router.post("/barcode", response_model=FoodItemResult, summary="Look up food by barcode")
+@limiter.limit(AI_RATE_LIMIT)
 async def lookup_barcode(
+    request: Request,
     data: BarcodeRequest,
     current_user: User = Depends(get_current_user),
 ):
@@ -112,7 +115,9 @@ async def lookup_barcode(
 # ─────────────────────────────────────────
 
 @router.post("/image", response_model=list[FoodItemResult], summary="Identify food from image")
+@limiter.limit(AI_RATE_LIMIT)
 async def identify_image(
+    request: Request,
     data: ImageRequest,
     current_user: User = Depends(get_current_user),
 ):
@@ -172,7 +177,9 @@ async def identify_image(
 # ─────────────────────────────────────────
 
 @router.post("/text", response_model=list[FoodItemResult], summary="Search or parse food by text")
+@limiter.limit(AI_RATE_LIMIT)
 async def search_text(
+    request: Request,
     data: TextRequest,
     current_user: User = Depends(get_current_user),
 ):

@@ -4,11 +4,12 @@ Coach AI router for NutriFlow.
 
 from typing import List, Optional
 from pydantic import BaseModel, Field
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 from datetime import datetime
 
 from app.database import get_db
+from app.limiter import AI_RATE_LIMIT, limiter
 from app.models.user import User
 from app.models.coach_message import CoachMessage, MessageRole
 from app.utils.security import get_current_user
@@ -17,9 +18,9 @@ from app.services.coach_agent import generate_coach_response
 router = APIRouter(prefix="/coach", tags=["Coach AI"])
 
 class MessageRequest(BaseModel):
-    message: str = Field(..., min_length=1)
+    message: str = Field(..., min_length=1, max_length=2000)
     is_initial_context: bool = Field(False, description="True if this is the automated opening message from meal advice")
-    advice_content: Optional[str] = Field(None, description="The advice text if is_initial_context is True")
+    advice_content: Optional[str] = Field(None, max_length=5000, description="The advice text if is_initial_context is True")
 
 class MessageOut(BaseModel):
     id: int
@@ -30,7 +31,9 @@ class MessageOut(BaseModel):
     model_config = {"from_attributes": True}
 
 @router.post("/message", response_model=MessageOut)
+@limiter.limit(AI_RATE_LIMIT)
 def send_message(
+    request: Request,
     data: MessageRequest,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),

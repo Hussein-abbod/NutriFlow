@@ -2,17 +2,16 @@
 NutriFlow — FastAPI application entry point.
 """
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
-from slowapi import Limiter, _rate_limit_exceeded_handler
-from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 
+from app.config import get_settings
+from app.limiter import limiter, rate_limit_exceeded_handler
 from app.routers import auth, users, onboarding, food_log, dashboard, coach
+from app.utils.token_transport import CLIENT_PLATFORM_HEADER
 
-# ---------- Rate limiter ----------
-limiter = Limiter(key_func=get_remote_address)
+settings = get_settings()
 
 # ---------- App ----------
 app = FastAPI(
@@ -23,15 +22,15 @@ app = FastAPI(
 
 # Attach limiter to app state (required by slowapi)
 app.state.limiter = limiter
-app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+app.add_exception_handler(RateLimitExceeded, rate_limit_exceeded_handler)
 
-# ---------- CORS (HTTPS-ready) ----------
+# ---------- CORS (explicit allow-list, credentials for the refresh cookie) ----------
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=False,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_origins=settings.cors_origin_list,
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_headers=["Authorization", "Content-Type", CLIENT_PLATFORM_HEADER],
 )
 
 # ---------- Routers ----------
