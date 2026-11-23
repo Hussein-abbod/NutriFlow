@@ -246,6 +246,25 @@ async def get_food_by_id(fdc_id: int) -> Optional[dict]:
     }
 
 
+def _same_gtin(left: str, right: str) -> bool:
+    """UPC-A, EAN-13 and GTIN-14 of one product differ only by leading zeros."""
+    return left.lstrip("0") == right.lstrip("0")
+
+
+def _barcode_match(foods: list[dict], upc: str) -> Optional[dict]:
+    """
+    The search is a keyword search, so a hit is not always the scanned product. Prefer a food
+    whose `gtinUpc` is the barcode; when results carry GTINs and none matches, there is no match.
+    """
+    with_gtin = [food for food in foods if food.get("gtinUpc")]
+    for food in with_gtin:
+        if _same_gtin(str(food["gtinUpc"]), upc):
+            return food
+    if with_gtin:
+        return None
+    return foods[0] if foods else None
+
+
 @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=1, max=4))
 async def search_by_barcode(upc: str) -> Optional[dict]:
     """
@@ -268,12 +287,10 @@ async def search_by_barcode(upc: str) -> Optional[dict]:
         resp.raise_for_status()
         data = resp.json()
 
-    foods = data.get("foods", [])
-    if not foods:
+    food = _barcode_match(data.get("foods", []), upc)
+    if food is None:
         return None
 
-    # Return the best match (first result)
-    food = foods[0]
     nutrients = parse_nutrients(food, quantity_g=100.0)
     return {
         "fdc_id": food.get("fdcId"),

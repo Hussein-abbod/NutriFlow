@@ -69,6 +69,15 @@ def reset_security_state():
     limiter.enabled = False
 
 
+@pytest.fixture
+def rate_limited():
+    """Turn the (normally disabled) rate limiter on for one test."""
+    limiter.enabled = True
+    limiter.reset()
+    yield
+    limiter.enabled = False
+
+
 @pytest.fixture(autouse=True)
 def mock_external_services(monkeypatch):
     """No test may reach Groq, Gemini or USDA."""

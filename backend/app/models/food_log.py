@@ -57,7 +57,10 @@ class FoodLog(Base):
     # Relationships
     user = relationship("User", back_populates="food_logs")
     items = relationship(
-        "FoodLogItem", back_populates="food_log", cascade="all, delete-orphan"
+        "FoodLogItem",
+        back_populates="food_log",
+        cascade="all, delete-orphan",
+        order_by="FoodLogItem.id",
     )
 
     def __repr__(self) -> str:

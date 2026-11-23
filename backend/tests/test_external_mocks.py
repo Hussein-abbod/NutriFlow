@@ -23,5 +23,6 @@ def test_user_cannot_delete_another_users_food_item(client, auth_headers, other_
     db_session.commit()
     item_id = log.items[0].id
 
-    assert client.delete(f"/food-log/item/{item_id}", headers=other_auth_headers).status_code == 403
+    # 404 (not 403): other users' item ids must not be distinguishable from missing ones.
+    assert client.delete(f"/food-log/item/{item_id}", headers=other_auth_headers).status_code == 404
     assert db_session.get(FoodLogItem, item_id) is not None

@@ -4,7 +4,6 @@ import pytest
 from pydantic import ValidationError
 
 from app.config import Settings
-from app.limiter import limiter
 from tests.helpers import ALLOWED_ORIGIN, DEFAULT_PASSWORD, register
 
 STRONG_SECRET = "s" * 40
@@ -55,14 +54,6 @@ def test_settings_parse_cors_list():
 def test_settings_reject_weak_secret_key(secret):
     with pytest.raises(ValidationError):
         Settings(SECRET_KEY=secret)
-
-
-@pytest.fixture
-def rate_limited():
-    limiter.enabled = True
-    limiter.reset()
-    yield
-    limiter.enabled = False
 
 
 def test_login_is_rate_limited(client, rate_limited):

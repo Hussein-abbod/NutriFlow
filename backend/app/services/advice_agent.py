@@ -66,9 +66,9 @@ def generate_meal_advice(
         )
 
 
-async def identify_foods_from_image(image_base64: str) -> list[dict]:
+async def identify_foods_from_image(image_base64: str, mime_type: str = "image/jpeg") -> list[dict]:
     """
-    Use Gemini 1.5 Flash to identify food items from a base64 image.
+    Use Gemini to identify food items from a base64 image (already validated by the caller).
     Returns a list of dicts: [{food_name, estimated_quantity, unit}]
     """
     from app.services.llm_config import get_gemini_llm
@@ -100,9 +100,9 @@ async def identify_foods_from_image(image_base64: str) -> list[dict]:
     try:
         message = HumanMessage(content=[
             {"type": "text", "text": prompt},
-            {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{image_base64}"}},
+            {"type": "image_url", "image_url": {"url": f"data:{mime_type};base64,{image_base64}"}},
         ])
-        response = llm.invoke([message])
+        response = await llm.ainvoke([message])
         text = response.content.strip()
 
         # Extract JSON from response
@@ -153,7 +153,7 @@ async def parse_food_text(text: str) -> list[dict]:
     )
 
     try:
-        response = llm.invoke([
+        response = await llm.ainvoke([
             SystemMessage(content=system),
             HumanMessage(content=f"Parse this meal description into USDA food items: {text}"),
         ])

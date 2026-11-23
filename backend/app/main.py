@@ -2,8 +2,10 @@
 NutriFlow — FastAPI application entry point.
 """
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from slowapi.errors import RateLimitExceeded
 
 from app.config import get_settings
@@ -23,6 +25,19 @@ app = FastAPI(
 # Attach limiter to app state (required by slowapi)
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, rate_limit_exceeded_handler)
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_error_handler(request: Request, exc: RequestValidationError) -> JSONResponse:
+    """
+    422 with only `loc`, `msg` and `type`. FastAPI's default also echoes the rejected `input`,
+    which leaks values such as passwords and crashes (500) on non-JSON values like NaN.
+    """
+    errors = [
+        {"loc": list(error.get("loc", ())), "msg": str(error.get("msg", "")), "type": str(error.get("type", ""))}
+        for error in exc.errors()
+    ]
+    return JSONResponse(status_code=422, content={"detail": errors})
 
 # ---------- CORS (explicit allow-list, credentials for the refresh cookie) ----------
 app.add_middleware(
