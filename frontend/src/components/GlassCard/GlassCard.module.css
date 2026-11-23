@@ -1,0 +1,49 @@
+.glass {
+  --glass-border-width: 1.5px;
+
+  position: relative;
+  padding: var(--glass-padding, 20px);
+  border-radius: var(--glass-radius, 20px);
+  background: var(--glass-bg);
+  box-shadow: var(--shadow-glass);
+  -webkit-backdrop-filter: blur(var(--glass-blur, 12px));
+  backdrop-filter: blur(var(--glass-blur, 12px));
+}
+
+/* Gradient border (Flutter GradientBorder), drawn as a masked ring on top */
+.glass::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  padding: var(--glass-border-width);
+  border-radius: inherit;
+  background: linear-gradient(to bottom right, var(--glass-border-start), var(--glass-border-end));
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box exclude,
+    linear-gradient(#000 0 0);
+  pointer-events: none;
+}
+
+.auto {
+  --glass-bg: rgb(255 255 255 / 0.7);
+  --glass-border-start: rgb(255 255 255 / 0.6);
+  --glass-border-end: rgb(255 255 255 / 0.1);
+}
+
+.onGradient {
+  --glass-bg: rgb(255 255 255 / var(--glass-opacity, 0.12));
+  --glass-border-start: rgb(255 255 255 / 0.15);
+  --glass-border-end: rgb(255 255 255 / 0.05);
+}
+
+@media (prefers-color-scheme: dark) {
+  .auto {
+    --glass-bg: rgb(255 255 255 / var(--glass-opacity, 0.12));
+    --glass-border-start: rgb(255 255 255 / 0.15);
+    --glass-border-end: rgb(255 255 255 / 0.05);
+  }
+}

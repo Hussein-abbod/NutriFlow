@@ -1,0 +1,11 @@
+.entrance {
+  animation: stagger-in var(--stagger-duration) var(--ease-smooth-decelerate) var(--stagger-delay)
+    both;
+}
+
+@keyframes stagger-in {
+  from {
+    opacity: 0;
+    transform: translateY(15%);
+  }
+}

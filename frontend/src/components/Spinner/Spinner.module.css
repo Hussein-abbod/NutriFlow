@@ -1,0 +1,49 @@
+.spinner {
+  display: inline-flex;
+  flex-shrink: 0;
+  color: var(--color-primary);
+}
+
+.spinner svg {
+  animation: rotate 1.4s linear infinite;
+}
+
+.arc {
+  stroke-dasharray: 80 100;
+  stroke-dashoffset: 0;
+  animation: dash 1.4s var(--ease-in-out) infinite;
+}
+
+@keyframes rotate {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes dash {
+  0% {
+    stroke-dasharray: 1 100;
+    stroke-dashoffset: 0;
+  }
+  50% {
+    stroke-dasharray: 70 100;
+    stroke-dashoffset: -15;
+  }
+  100% {
+    stroke-dasharray: 70 100;
+    stroke-dashoffset: -99;
+  }
+}
+
+/* Keep a slow, non-distracting rotation so loading is still visible. */
+@media (prefers-reduced-motion: reduce) {
+  .spinner svg {
+    animation: rotate 2.5s linear infinite !important;
+    animation-iteration-count: infinite !important;
+    animation-duration: 2.5s !important;
+  }
+  .arc {
+    animation: none !important;
+    stroke-dasharray: 70 100;
+  }
+}

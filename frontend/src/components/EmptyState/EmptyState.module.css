@@ -1,0 +1,34 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-6);
+  text-align: center;
+}
+
+.bubble {
+  display: grid;
+  place-items: center;
+  padding: var(--space-5);
+  margin-bottom: var(--space-4);
+  border-radius: var(--radius-full);
+  background: color-mix(in srgb, var(--color-primary) 8%, transparent);
+  color: color-mix(in srgb, var(--color-primary) 40%, transparent);
+}
+
+.title {
+  color: var(--color-text);
+  font: var(--font-title-md);
+}
+
+.message {
+  max-width: 280px;
+  margin-top: var(--space-2);
+  color: var(--color-text-secondary);
+  font: var(--font-body-md);
+}
+
+.action {
+  margin-top: var(--space-4);
+}

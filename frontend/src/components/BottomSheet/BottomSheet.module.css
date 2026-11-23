@@ -1,0 +1,74 @@
+.root {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.scrim {
+  position: absolute;
+  inset: 0;
+  background: var(--color-scrim);
+  animation: fade-in var(--duration-sheet-enter) var(--ease-smooth-decelerate) both;
+}
+
+.sheet {
+  position: relative;
+  width: 100%;
+  max-width: 640px;
+  max-height: 90dvh;
+  overflow-y: auto;
+  padding: var(--space-3) var(--space-5) calc(var(--space-5) + var(--safe-bottom));
+  border-radius: var(--radius-sheet) var(--radius-sheet) 0 0;
+  background: var(--color-surface);
+  color: var(--color-text);
+  animation: slide-up var(--duration-sheet-enter) var(--ease-smooth-decelerate) both;
+  overscroll-behavior: contain;
+}
+
+.sheet:focus-visible {
+  outline: none;
+}
+
+.handle {
+  width: 40px;
+  height: 4px;
+  margin: 0 auto var(--space-4);
+  border-radius: var(--radius-xs);
+  background: var(--color-sheet-handle);
+}
+
+.closing .scrim {
+  animation: fade-out var(--duration-sheet-exit) var(--ease-in) both;
+}
+
+.closing .sheet {
+  animation: slide-down var(--duration-sheet-exit) var(--ease-in) both;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes fade-out {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes slide-up {
+  from {
+    transform: translateY(100%);
+  }
+}
+
+@keyframes slide-down {
+  to {
+    transform: translateY(100%);
+  }
+}

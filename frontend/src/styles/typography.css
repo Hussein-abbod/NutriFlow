@@ -1,0 +1,50 @@
+/* Utility classes matching Flutter's TextTheme names. */
+
+.text-display-lg {
+  font: var(--font-display-lg);
+  letter-spacing: var(--letter-spacing-display-lg);
+}
+.text-display-md {
+  font: var(--font-display-md);
+  letter-spacing: var(--letter-spacing-display-md);
+}
+.text-display-sm {
+  font: var(--font-display-sm);
+}
+.text-headline-lg {
+  font: var(--font-headline-lg);
+}
+.text-headline-md {
+  font: var(--font-headline-md);
+}
+.text-headline-sm {
+  font: var(--font-headline-sm);
+}
+.text-title-lg {
+  font: var(--font-title-lg);
+}
+.text-title-md {
+  font: var(--font-title-md);
+}
+.text-title-sm {
+  font: var(--font-title-sm);
+}
+.text-body-lg {
+  font: var(--font-body-lg);
+}
+.text-body-md {
+  font: var(--font-body-md);
+}
+.text-body-sm {
+  font: var(--font-body-sm);
+}
+.text-label-lg {
+  font: var(--font-label-lg);
+  letter-spacing: var(--letter-spacing-label-lg);
+}
+.text-label-md {
+  font: var(--font-label-md);
+}
+.text-label-sm {
+  font: var(--font-label-sm);
+}

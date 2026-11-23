@@ -1,0 +1,182 @@
+/*
+ * Flutter InputDecoration: filled, OutlineInputBorder radius 16, content padding 20/16.
+ * The label floats into a notch in the outline (fieldset/legend), like Material.
+ */
+.field {
+  --tf-fill: var(--color-input-fill);
+  --tf-border: var(--color-input-border);
+  --tf-focus: var(--color-input-focus);
+  --tf-error: var(--color-error);
+  --tf-text: var(--color-text);
+  --tf-label: var(--color-text-secondary);
+  --tf-icon: var(--color-text-secondary);
+  --tf-error-text: var(--color-error);
+
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+/* White-on-gradient (login_screen.dart / step_welcome.dart) */
+.glass {
+  --tf-fill: rgb(255 255 255 / 0.08);
+  --tf-border: rgb(255 255 255 / 0.15);
+  --tf-focus: var(--color-white);
+  --tf-error: var(--brand-coral);
+  --tf-text: var(--color-white);
+  --tf-label: rgb(255 255 255 / 0.7);
+  --tf-icon: rgb(255 255 255 / 0.7);
+  --tf-error-text: var(--brand-orange-200);
+}
+
+.control {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-height: 56px;
+  border-radius: var(--radius-input);
+  background: var(--tf-fill);
+}
+
+.input {
+  flex: 1;
+  min-width: 0;
+  height: 56px;
+  padding: var(--space-4) var(--space-5);
+  border: 0;
+  background: transparent;
+  color: var(--tf-text);
+  font: 400 16px/1.5 var(--font-family);
+  outline: none;
+  caret-color: var(--tf-focus);
+}
+
+.withPrefix {
+  padding-left: 48px;
+}
+
+.withSuffix {
+  padding-right: 0;
+}
+
+/* The outline border (fieldset) is the focus indicator. */
+.input:focus-visible {
+  outline: none;
+}
+
+/* Autofill must not paint the field yellow/white on the gradient. */
+.input:-webkit-autofill {
+  -webkit-text-fill-color: var(--tf-text);
+  transition: background-color 600000s 0s;
+}
+
+.prefixIcon {
+  position: absolute;
+  left: 12px;
+  color: var(--tf-icon);
+  pointer-events: none;
+}
+
+.suffix {
+  display: flex;
+  align-items: center;
+  padding-right: var(--space-1);
+  color: var(--tf-icon);
+}
+
+.label {
+  position: absolute;
+  top: 50%;
+  left: var(--space-5);
+  max-width: calc(100% - 40px);
+  overflow: hidden;
+  color: var(--tf-label);
+  font: 400 16px/1.5 var(--font-family);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  pointer-events: none;
+  transform: translateY(-50%);
+  transform-origin: left top;
+  transition:
+    transform var(--duration-fast) var(--ease-smooth-decelerate),
+    color var(--duration-fast) var(--ease-smooth-decelerate);
+}
+
+.labelWithPrefix {
+  left: 48px;
+}
+
+/* Floated label: focused, has a value, or autofilled */
+.control:focus-within .label,
+.input:not(:placeholder-shown) ~ .label,
+.input:autofill ~ .label {
+  transform: translate(calc(var(--space-5) * -1 + 14px), -38px) scale(0.75);
+}
+
+.control:focus-within .labelWithPrefix,
+.input:not(:placeholder-shown) ~ .labelWithPrefix,
+.input:autofill ~ .labelWithPrefix {
+  transform: translate(-34px, -38px) scale(0.75);
+}
+
+.control:focus-within .label {
+  color: var(--tf-focus);
+}
+
+.outline {
+  position: absolute;
+  inset: -5px 0 0;
+  margin: 0;
+  padding: 0 10px;
+  border: 1px solid var(--tf-border);
+  border-radius: var(--radius-input);
+  pointer-events: none;
+  transition: border-color var(--duration-fast) var(--ease-in-out);
+}
+
+.legend {
+  max-width: 0.01px;
+  height: 11px;
+  padding: 0;
+  overflow: hidden;
+  font: 400 12px/1 var(--font-family);
+  white-space: nowrap;
+  visibility: hidden;
+  transition: max-width 50ms linear;
+}
+
+.legend > span {
+  display: inline-block;
+  padding: 0 4px;
+}
+
+.control:focus-within .legend,
+.input:not(:placeholder-shown) ~ .outline .legend,
+.input:autofill ~ .outline .legend {
+  max-width: 100%;
+  transition: max-width 100ms linear 50ms;
+}
+
+.control:focus-within .outline {
+  border-width: 2px;
+  border-color: var(--tf-focus);
+}
+
+.invalid .outline {
+  border-color: var(--tf-error);
+}
+
+.invalid .control:focus-within .outline {
+  border-color: var(--tf-error);
+}
+
+.invalid .label,
+.invalid .control:focus-within .label {
+  color: var(--tf-error-text);
+}
+
+.error {
+  padding: 0 var(--space-4);
+  color: var(--tf-error-text);
+  font: var(--font-body-sm);
+}

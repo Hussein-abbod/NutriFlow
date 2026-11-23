@@ -1,0 +1,230 @@
+/*
+ * NutriFlow design tokens.
+ * Source of truth: mobile/lib/config/theme.dart + mobile/lib/config/animations.dart.
+ * Light theme on :root, dark theme via prefers-color-scheme (Flutter ThemeMode.system).
+ */
+
+:root {
+  color-scheme: light;
+
+  /* ── Brand (theme-independent) ── */
+  --brand-primary: #006d36;
+  --brand-primary-container: #4ade80;
+  --brand-on-primary-container: #005e2d;
+  --brand-tertiary: #005ac2;
+  --brand-on-tertiary-container: #004da8;
+  --brand-error: #ba1a1a;
+  --brand-emerald: #006d36;
+  --brand-emerald-dark: #005e2d;
+  --brand-teal: #00bfa5;
+  --brand-coral: #ba1a1a;
+  --brand-coral-light: #ff8a80;
+  --brand-purple: #005ac2;
+  --brand-blue: #448aff;
+  --brand-orange-200: #ffcc80; /* Colors.orange.shade200 – error text on dark gradients */
+  --color-white: #ffffff;
+  --color-black: #000000;
+
+  /* ── Color scheme (light) ── */
+  --color-primary: #006d36;
+  --color-on-primary: #ffffff;
+  --color-primary-container: #4ade80;
+  --color-on-primary-container: #005e2d;
+  --color-secondary: #55615a;
+  --color-on-secondary: #ffffff;
+  --color-secondary-container: #d9e6dd;
+  --color-on-secondary-container: #5b6760;
+  --color-tertiary: #005ac2;
+  --color-on-tertiary: #ffffff;
+  --color-error: #ba1a1a;
+  --color-on-error: #ffffff;
+
+  --color-background: #f8f9ff;
+  --color-surface: #ffffff;
+  --color-on-surface: #121c2a;
+  --color-surface-variant: #d9e3f6;
+  --color-surface-container-highest: #dee9fc;
+  --color-text: #121c2a;
+  --color-text-secondary: #6b7280;
+  --color-outline: #6d7b6d;
+  --color-outline-variant: #bccabb;
+
+  /* Component colors (ThemeData sub-themes + NutriFlowTheme helpers) */
+  --color-card: #ffffff; /* cardBackground() */
+  --color-card-border: rgb(188 202 187 / 0.3); /* outlineVariant() */
+  --color-input-fill: #ffffff;
+  --color-input-border: #bccabb;
+  --color-input-focus: #006d36;
+  --color-chip: #f0f2f5;
+  --color-divider: #d9e3f6;
+  --color-snackbar: #121c2a;
+  --color-on-snackbar: #ffffff;
+  --color-nav: #ffffff;
+  --color-nav-selected: #006d36;
+  --color-nav-unselected: #6b7280;
+  --color-sheet-handle: #e0e0e0; /* Colors.grey.shade300 */
+  --color-scrim: rgb(0 0 0 / 0.54); /* Material modal barrier (black54) */
+  --color-ring-track: rgb(0 0 0 / 0.1); /* 0x1A000000 */
+
+  /* ── Gradients (Alignment.topLeft → bottomRight = "to bottom right") ── */
+  --gradient-primary: linear-gradient(to bottom right, #006d36, #00956a);
+  --gradient-primary-dark: linear-gradient(to bottom right, #4de082, #1de9b6);
+  --gradient-theme-primary: var(--gradient-primary); /* NutriFlowTheme.gradient(context) */
+  --gradient-accent: linear-gradient(to bottom right, #005ac2, #004395);
+  --gradient-coral: linear-gradient(to bottom right, #ba1a1a, #e53935);
+  --gradient-splash: linear-gradient(to bottom, #005e2d, #006d36);
+  --gradient-auth: linear-gradient(to bottom right, #1b5e20, #00695c); /* login_screen.dart */
+  /* onboarding_screen.dart _stepGradients (same in both themes) */
+  --gradient-onboarding-welcome: linear-gradient(to bottom right, #1b5e20, #00695c);
+  --gradient-onboarding-basic-info: linear-gradient(to bottom right, #0d47a1, #1565c0);
+  --gradient-onboarding-activity: linear-gradient(to bottom right, #4a148c, #7b1fa2);
+  --gradient-onboarding-goal: linear-gradient(to bottom right, #00695c, #00826c);
+  --gradient-onboarding-allergies: linear-gradient(to bottom right, #00695c, #00897b);
+  --gradient-onboarding-summary: linear-gradient(to bottom right, #1b5e20, #2e7d32);
+  --color-onboarding-welcome: #1b5e20; /* first gradient colour = white-button text colour */
+  --gradient-ring-start: #006d36;
+  --gradient-ring-end: #00956a;
+
+  /* ── Typography (Inter, Material 3 scale from _textTheme) ── */
+  --font-family: 'Inter Variable', Inter, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-display-lg: 700 57px/1.12 var(--font-family);
+  --font-display-md: 700 45px/1.16 var(--font-family);
+  --font-display-sm: 600 36px/1.22 var(--font-family);
+  --font-headline-lg: 700 32px/1.25 var(--font-family);
+  --font-headline-md: 600 28px/1.29 var(--font-family);
+  --font-headline-sm: 600 24px/1.33 var(--font-family);
+  --font-title-lg: 600 22px/1.27 var(--font-family);
+  --font-title-md: 600 16px/1.5 var(--font-family);
+  --font-title-sm: 600 14px/1.43 var(--font-family);
+  --font-body-lg: 400 16px/1.5 var(--font-family);
+  --font-body-md: 400 14px/1.5 var(--font-family);
+  --font-body-sm: 400 12px/1.4 var(--font-family);
+  --font-label-lg: 600 14px/1.43 var(--font-family);
+  --font-label-md: 500 12px/1.33 var(--font-family);
+  --font-label-sm: 500 11px/1.45 var(--font-family);
+  --font-app-bar-title: 700 20px/1.2 var(--font-family);
+  --letter-spacing-display-lg: -0.5px;
+  --letter-spacing-display-md: -0.25px;
+  --letter-spacing-label-lg: 0.5px;
+
+  /* ── Radii ── */
+  --radius-xs: 2px;
+  --radius-sm: 10px;
+  --radius-chip: 12px;
+  --radius-snackbar: 12px;
+  --radius-button: 16px;
+  --radius-input: 16px;
+  --radius-card: 20px;
+  --radius-fab: 20px;
+  --radius-dialog: 24px;
+  --radius-sheet: 28px;
+  --radius-full: 9999px;
+
+  /* ── Spacing (Flutter EdgeInsets values in use) ── */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-7: 28px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-15: 60px;
+
+  /* ── Shadows ── */
+  --shadow-glass: 0 8px 24px rgb(0 0 0 / 0.06);
+  --shadow-primary-button: 0 6px 16px rgb(0 109 54 / 0.4);
+  --shadow-primary-soft: 0 4px 8px rgb(0 109 54 / 0.15);
+  --shadow-splash-glow: 0 0 12px rgb(0 109 54 / 0.15);
+  --shadow-fab: 0 2px 4px rgb(0 0 0 / 0.2);
+
+  /* ── Motion (NutriAnimations) ── */
+  --duration-fast: 200ms;
+  --duration-normal: 350ms;
+  --duration-slow: 600ms;
+  --duration-entrance: 800ms;
+  --duration-page: 400ms;
+  --duration-page-reverse: 300ms;
+  --duration-sheet-enter: 250ms;
+  --duration-sheet-exit: 200ms;
+  --duration-ring: 900ms;
+
+  /* Flutter Curves → CSS */
+  --ease-in: cubic-bezier(0.42, 0, 1, 1); /* Curves.easeIn */
+  --ease-out: cubic-bezier(0, 0, 0.58, 1); /* Curves.easeOut */
+  --ease-in-out: cubic-bezier(0.42, 0, 0.58, 1); /* Curves.easeInOut */
+  --ease-smooth-decelerate: cubic-bezier(0.215, 0.61, 0.355, 1); /* easeOutCubic */
+  --ease-subtle-bounce: cubic-bezier(0.175, 0.885, 0.32, 1.275); /* easeOutBack */
+  --ease-gentle: cubic-bezier(0.645, 0.045, 0.355, 1); /* easeInOutCubic */
+  --ease-spring: linear(
+    0,
+    0.35 4%,
+    1.12 12%,
+    1.24 16%,
+    1.12 22%,
+    0.97 30%,
+    0.93 35%,
+    1.01 48%,
+    1.02 55%,
+    1 70%,
+    1
+  ); /* Curves.elasticOut (approximation) */
+
+  /* ── Layout ── */
+  --tap-target: 48px;
+  --content-max-width: 480px;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+
+    --color-primary: #4de082;
+    --color-on-primary: #000000;
+    --color-primary-container: #003300;
+    --color-on-primary-container: #4de082;
+    --color-secondary: #ff8a80;
+    --color-on-secondary: #000000;
+    --color-secondary-container: rgb(255 138 128 / 0.15);
+    --color-on-secondary-container: #ff8a80;
+    --color-tertiary: #adc6ff;
+    --color-on-tertiary: #000000;
+    --color-error: #ff5252;
+    --color-on-error: #000000;
+
+    --color-background: #121218;
+    --color-surface: #1e1e2e;
+    --color-on-surface: #e8e8f0;
+    --color-surface-variant: #2a2a3c;
+    --color-surface-container-highest: #2a2a3c;
+    --color-text: #e8e8f0;
+    --color-text-secondary: #9ca3af;
+    /* Flutter's dark ColorScheme leaves outline unset → defaults to onSurface */
+    --color-outline: #e8e8f0;
+    --color-outline-variant: #3a3a4c;
+
+    --color-card: #2a2a3c;
+    --color-card-border: rgb(255 255 255 / 0.08);
+    --color-input-fill: #2a2a3c;
+    --color-input-border: #3a3a4c;
+    --color-input-focus: #4de082;
+    --color-chip: #2a2a3c;
+    --color-divider: rgb(255 255 255 / 0.08);
+    --color-snackbar: #2a2a3c;
+    --color-on-snackbar: #e8e8f0;
+    --color-nav: #1e1e2e;
+    --color-nav-selected: #4de082;
+    --color-nav-unselected: #9ca3af;
+    --color-sheet-handle: rgb(255 255 255 / 0.15);
+
+    --gradient-theme-primary: var(--gradient-primary-dark);
+    --gradient-auth: linear-gradient(to bottom right, #0d1b0f, #0a1628);
+
+    --shadow-glass: 0 8px 24px rgb(0 0 0 / 0.3);
+  }
+}
