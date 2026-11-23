@@ -1,0 +1,97 @@
+/*
+ * splash_screen.dart timeline:
+ *   0–900ms     logo scales 0.5→1 (easeOutBack) and fades in over the first 60% (easeIn)
+ *   900ms+      title/tagline/loader fade up (700ms), glow ring pulses 0.9↔1.15 every 1.5s
+ */
+.splash {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100dvh;
+  padding: var(--safe-top) var(--space-6) var(--safe-bottom);
+  background: var(--gradient-splash);
+  color: var(--color-white);
+}
+
+.logoStack {
+  display: grid;
+  place-items: center;
+}
+
+.logoStack > * {
+  grid-area: 1 / 1;
+}
+
+.glowRing {
+  width: 160px;
+  height: 160px;
+  border: 2px solid rgb(255 255 255 / 0.15);
+  border-radius: var(--radius-full);
+  box-shadow: var(--shadow-splash-glow);
+  animation: pulse 1500ms var(--ease-in-out) 900ms infinite alternate;
+}
+
+.logo {
+  animation:
+    logo-scale 900ms var(--ease-subtle-bounce) both,
+    logo-fade 540ms var(--ease-in) both;
+}
+
+.titleGroup {
+  margin-top: var(--space-8);
+  text-align: center;
+  animation: text-in 700ms var(--ease-smooth-decelerate) 900ms both;
+}
+
+/* headlineLarge (32) with w800, letterSpacing 1.2 */
+.appName {
+  font: 800 32px/1.25 var(--font-family);
+  letter-spacing: 1.2px;
+}
+
+.tagline {
+  margin-top: var(--space-2);
+  color: rgb(255 255 255 / 0.7);
+  font: var(--font-body-md);
+  letter-spacing: 0.5px;
+}
+
+.loader {
+  margin-top: var(--space-15);
+  animation: fade-in 700ms var(--ease-out) 900ms both;
+}
+
+@keyframes logo-scale {
+  from {
+    transform: scale(0.5);
+  }
+}
+
+@keyframes logo-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes text-in {
+  from {
+    opacity: 0;
+    transform: translateY(30%);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes pulse {
+  from {
+    transform: scale(0.9);
+  }
+  to {
+    transform: scale(1.15);
+  }
+}

@@ -1,0 +1,18 @@
+.page {
+  min-height: 100dvh;
+  animation:
+    page-fade var(--duration-page) var(--ease-in-out) both,
+    page-slide var(--duration-page) var(--ease-smooth-decelerate) both;
+}
+
+@keyframes page-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes page-slide {
+  from {
+    transform: translateY(4%);
+  }
+}

@@ -1,0 +1,32 @@
+.link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: pre-wrap;
+  min-height: var(--tap-target);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-button);
+  color: rgb(255 255 255 / 0.7);
+  font: 400 14px/1.43 var(--font-family);
+  text-decoration: none;
+}
+
+.link:hover {
+  background: rgb(255 255 255 / 0.08);
+}
+
+.link:focus-visible {
+  outline-color: var(--color-white);
+}
+
+.action {
+  font-weight: 700;
+}
+
+.accent {
+  color: var(--brand-primary-container);
+}
+
+.white {
+  color: var(--color-white);
+}
