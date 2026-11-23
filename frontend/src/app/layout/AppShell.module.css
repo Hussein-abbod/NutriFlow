@@ -1,0 +1,17 @@
+.shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  background: var(--color-background);
+}
+
+.tab {
+  flex: 1;
+  animation: tab-in 300ms var(--ease-smooth-decelerate) both;
+}
+
+@keyframes tab-in {
+  from {
+    opacity: 0;
+  }
+}

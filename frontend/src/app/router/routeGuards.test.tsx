@@ -24,11 +24,11 @@ describe('splash + route guards', () => {
     await waitFor(() => expect(router.state.location.pathname).toBe('/login'));
   });
 
-  it('restores a session from the refresh cookie and goes home', async () => {
+  it('restores a session from the refresh cookie and opens the first tab', async () => {
     server.use(...sessionHandlers(onboardedUser));
     const { router } = renderApp('/');
-    await waitFor(() => expect(router.state.location.pathname).toBe('/home'));
-    expect(await screen.findByText('Hi, Alice')).toBeInTheDocument();
+    await waitFor(() => expect(router.state.location.pathname).toBe('/food-log'));
+    expect(await screen.findByRole('heading', { name: 'Food Log' })).toBeInTheDocument();
     expect(tokenStore.getAccessToken()).toBe('restored');
   });
 
@@ -41,9 +41,9 @@ describe('splash + route guards', () => {
   it('keeps onboarded users away from login and onboarding', async () => {
     server.use(...sessionHandlers(onboardedUser));
     const { router } = renderApp('/onboarding');
-    await waitFor(() => expect(router.state.location.pathname).toBe('/home'));
+    await waitFor(() => expect(router.state.location.pathname).toBe('/food-log'));
     await act(() => router.navigate('/login'));
-    await waitFor(() => expect(router.state.location.pathname).toBe('/home'));
+    await waitFor(() => expect(router.state.location.pathname).toBe('/food-log'));
   });
 
   it('logs out and returns to login', async () => {
@@ -55,7 +55,7 @@ describe('splash + route guards', () => {
         return new HttpResponse(null, { status: 204 });
       }),
     );
-    const { router } = renderApp('/home');
+    const { router } = renderApp('/profile');
     await userEvent.click(await screen.findByRole('button', { name: 'Log out' }));
     await waitFor(() => expect(router.state.location.pathname).toBe('/login'));
     expect(logoutCalls).toBe(1);
@@ -64,8 +64,8 @@ describe('splash + route guards', () => {
 
   it('redirects to login with a message when the session expires', async () => {
     server.use(...sessionHandlers(onboardedUser));
-    const { router } = renderApp('/home');
-    await screen.findByText('Hi, Alice');
+    const { router } = renderApp('/coach');
+    await screen.findByRole('heading', { name: 'Coach AI' });
     act(() => tokenStore.notifySessionExpired());
     await waitFor(() => expect(router.state.location.pathname).toBe('/login'));
     expect(screen.getByRole('status')).toHaveTextContent(
