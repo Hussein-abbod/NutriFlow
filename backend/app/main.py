@@ -11,6 +11,7 @@ from slowapi.errors import RateLimitExceeded
 from app.config import get_settings
 from app.limiter import limiter, rate_limit_exceeded_handler
 from app.routers import auth, users, onboarding, food_log, dashboard, coach
+from app.utils.request_size import RequestSizeLimitMiddleware
 from app.utils.token_transport import CLIENT_PLATFORM_HEADER
 
 settings = get_settings()
@@ -34,10 +35,23 @@ async def validation_error_handler(request: Request, exc: RequestValidationError
     which leaks values such as passwords and crashes (500) on non-JSON values like NaN.
     """
     errors = [
-        {"loc": list(error.get("loc", ())), "msg": str(error.get("msg", "")), "type": str(error.get("type", ""))}
+        {
+            "loc": list(error.get("loc", ())),
+            "msg": _clean_message(str(error.get("msg", ""))),
+            "type": str(error.get("type", "")),
+        }
         for error in exc.errors()
     ]
     return JSONResponse(status_code=422, content={"detail": errors})
+
+
+def _clean_message(message: str) -> str:
+    """Pydantic prefixes messages from our own validators with "Value error, "."""
+    return message.removeprefix("Value error, ")
+
+
+# ---------- Body size limit (inside CORS, so even a 413 carries CORS headers) ----------
+app.add_middleware(RequestSizeLimitMiddleware)
 
 # ---------- CORS (explicit allow-list, credentials for the refresh cookie) ----------
 app.add_middleware(

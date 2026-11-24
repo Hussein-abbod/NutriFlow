@@ -1,4 +1,4 @@
-import { screen, waitFor, within } from '@testing-library/react';
+import { act, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { delay, http, HttpResponse } from 'msw';
 import { beforeAll, describe, expect, it } from 'vitest';
@@ -110,7 +110,7 @@ describe('FoodConfirmPage', () => {
     await userEvents.type(quantity, '0');
     await userEvents.click(within(sheet).getByRole('button', { name: 'Update' }));
     expect(within(sheet).getByRole('alert')).toHaveTextContent(
-      'Enter an amount above 0 and up to 10000.',
+      'Enter an amount from 0.01 to 10000.',
     );
 
     await userEvents.clear(quantity);
@@ -176,6 +176,32 @@ describe('FoodConfirmPage', () => {
         ],
       },
     ]);
+  });
+
+  it('does not let the user leave while the meal is being logged', async () => {
+    let release: () => void = () => undefined;
+    const answered = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    server.use(
+      http.post(`${TEST_API}/food-log/submit`, async () => {
+        await answered;
+        return HttpResponse.json(buildFoodLog({ log_date: today, ai_advice: 'Saved!' }));
+      }),
+    );
+    const { router, userEvents } = renderConfirm();
+    await userEvents.click(await screen.findByRole('button', { name: 'Log Meal' }));
+
+    await userEvents.click(screen.getByRole('button', { name: 'Back' }));
+    await act(() => router.navigate(-1));
+    expect(router.state.location.pathname).toBe('/food-log/confirm');
+    expect(screen.getByRole('button', { name: 'Logging meal...' })).toBeDisabled();
+
+    release();
+    expect(await screen.findByRole('dialog', { name: 'NutriFlow Advice' })).toHaveTextContent(
+      'Saved!',
+    );
+    expect(router.state.location.pathname).toBe('/food-log');
   });
 
   it('keeps the foods and shows the error when logging fails', async () => {

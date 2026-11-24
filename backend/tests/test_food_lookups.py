@@ -1,12 +1,17 @@
 """Food-log lookups: POST /food-log/text, /barcode and /image (USDA, Groq, Gemini mocked)."""
 
+import asyncio
 import base64
 
 import httpx
 import pytest
+from tenacity import stop_after_attempt
 
 from app.services import advice_agent, usda_client
 from app.utils.image_validation import MAX_BASE64_CHARS, MAX_IMAGE_BYTES
+
+# conftest replaces usda_client.search_by_barcode for every test; keep the real one here.
+REAL_SEARCH_BY_BARCODE = usda_client.search_by_barcode
 
 JPEG = b"\xff\xd8\xff\xe0" + b"\x00" * 64
 PNG = b"\x89PNG\r\n\x1a\n" + b"\x00" * 64
@@ -270,3 +275,59 @@ def test_lookups_are_rate_limited(client, auth_headers, identified, rate_limited
     statuses = [client.post(path, json=body, headers=auth_headers).status_code for _ in range(21)]
     assert statuses[:20] == [200] * 20
     assert statuses[20] == 429
+
+
+# ---------- UPC-E barcodes ----------
+
+
+@pytest.mark.parametrize(
+    "upce, upca",
+    [
+        ("04252614", "042100005264"),  # last digit 0-2: manufacturer keeps it
+        ("01234531", "012300000451"),  # last digit 3
+        ("01234532", None),  # wrong check digit -> not a UPC-E (could be EAN-8)
+        ("00123457", "001234000057"),  # last digit 5-9
+        ("12345670", "123456000070"),  # number system 1
+        ("12345671", None),
+        ("40063813", None),  # EAN-8 style, system digit 4
+        ("012345678905", None),  # already UPC-A
+    ],
+)
+def test_expand_upce(upce, upca):
+    assert usda_client.expand_upce(upce) == upca
+
+
+def test_barcode_match_accepts_the_upca_form_of_a_upce_scan():
+    foods = [{"description": "Other", "gtinUpc": "011111111111"}, {"description": "Soup", "gtinUpc": "042100005264"}]
+    assert usda_client._barcode_match(foods, "04252614")["description"] == "Soup"
+
+
+def test_upce_lookup_also_searches_usda_with_the_upca_form(monkeypatch):
+    queries = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        query = request.url.params["query"]
+        queries.append(query)
+        foods = [{"fdcId": 9, "description": "Soup", "gtinUpc": "042100005264"}] if query == "042100005264" else []
+        return httpx.Response(200, json={"foods": foods})
+
+    real_client = httpx.AsyncClient
+    monkeypatch.setattr(
+        usda_client.httpx, "AsyncClient", lambda **kwargs: real_client(transport=httpx.MockTransport(handler))
+    )
+    food = asyncio.run(REAL_SEARCH_BY_BARCODE.retry_with(stop=stop_after_attempt(1))("04252614"))
+
+    assert queries == ["04252614", "042100005264"]
+    assert food["food_name"] == "Soup"
+
+
+# ---------- Unexpected errors are not hidden as outages ----------
+
+
+def test_programming_errors_in_usda_lookups_are_not_reported_as_503(client, auth_headers, monkeypatch):
+    async def broken(query, page_size=10):
+        raise KeyError("foodNutrients")
+
+    monkeypatch.setattr(usda_client, "search_foods", broken)
+    with pytest.raises(KeyError):
+        client.post("/food-log/text", json={"query": "rice", "meal_type": "lunch"}, headers=auth_headers)

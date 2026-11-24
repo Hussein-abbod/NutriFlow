@@ -10,26 +10,29 @@ import { FOOD_LIMITS } from '../schemas/limits';
 export function useBarcodeScan() {
   const lookup = useLookupBarcode();
   const [found, setFound] = useState<FoodItem | null>(null);
-  // Set synchronously so a second read in the same frame cannot start another lookup.
-  const busyRef = useRef(false);
+  // Camera reads are ignored from the first read until Retry / Rescan (Flutter `_scanned`).
+  // Set synchronously so a second read in the same frame cannot start another lookup, and
+  // kept after a failed lookup: the camera still sees the same code every second.
+  const scannedRef = useRef(false);
 
-  const lookUp = (barcode: string) => {
-    if (busyRef.current) return;
-    busyRef.current = true;
-    lookup.mutate(barcode, {
-      onSuccess: (item) => setFound(item),
-      onError: () => {
-        busyRef.current = false;
-      },
-    });
-  };
+  const runLookup = (barcode: string) =>
+    lookup.mutate(barcode, { onSuccess: (item) => setFound(item) });
 
   const onDetected = (code: string) => {
-    if (FOOD_LIMITS.barcodePattern.test(code)) lookUp(code);
+    if (scannedRef.current || !FOOD_LIMITS.barcodePattern.test(code)) return;
+    scannedRef.current = true;
+    runLookup(code);
+  };
+
+  /** Typed by the user: always allowed unless a lookup is already running. */
+  const lookUp = (barcode: string) => {
+    if (lookup.isPending) return;
+    scannedRef.current = true;
+    runLookup(barcode);
   };
 
   const rescan = () => {
-    busyRef.current = false;
+    scannedRef.current = false;
     lookup.reset();
     setFound(null);
   };

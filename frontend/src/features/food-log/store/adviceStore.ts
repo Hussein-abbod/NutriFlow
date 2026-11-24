@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { useSessionStore } from '@/features/auth';
 import type { FoodLogDto } from '@/types/api';
 
 interface AdviceState {
@@ -14,3 +15,8 @@ export const useAdviceStore = create<AdviceState>((set) => ({
   setLastSubmittedLog: (log) => set({ lastSubmittedLog: log }),
   clearAdvice: () => set({ lastSubmittedLog: null }),
 }));
+
+// Logout and session expiry both end the session: never show one user's meal to the next.
+useSessionStore.subscribe((session) => {
+  if (session.status === 'anonymous') useAdviceStore.getState().clearAdvice();
+});

@@ -251,14 +251,43 @@ def _same_gtin(left: str, right: str) -> bool:
     return left.lstrip("0") == right.lstrip("0")
 
 
+def _upc_check_digit(first_eleven: str) -> int:
+    odd = sum(int(digit) for digit in first_eleven[0::2])
+    even = sum(int(digit) for digit in first_eleven[1::2])
+    return (10 - (odd * 3 + even) % 10) % 10
+
+
+def expand_upce(code: str) -> Optional[str]:
+    """
+    The 12-digit UPC-A of an 8-digit UPC-E (zero-suppressed) barcode, or None when `code`
+    is not a valid UPC-E (8-digit codes can also be EAN-8, which has no expansion).
+    """
+    if len(code) != 8 or not code.isdigit() or code[0] not in "01":
+        return None
+    system, digits, check = code[0], code[1:7], code[7]
+    last = int(digits[5])
+    if last <= 2:
+        body = digits[0:2] + digits[5] + "0000" + digits[2:5]
+    elif last == 3:
+        body = digits[0:3] + "00000" + digits[3:5]
+    elif last == 4:
+        body = digits[0:4] + "00000" + digits[4]
+    else:
+        body = digits[0:5] + "0000" + digits[5]
+    upc_a = system + body + check
+    return upc_a if _upc_check_digit(upc_a[:11]) == int(check) else None
+
+
 def _barcode_match(foods: list[dict], upc: str) -> Optional[dict]:
     """
     The search is a keyword search, so a hit is not always the scanned product. Prefer a food
-    whose `gtinUpc` is the barcode; when results carry GTINs and none matches, there is no match.
+    whose `gtinUpc` is the barcode (or its UPC-A form); when results carry GTINs and none
+    matches, there is no match.
     """
+    candidates = [code for code in (upc, expand_upce(upc)) if code]
     with_gtin = [food for food in foods if food.get("gtinUpc")]
     for food in with_gtin:
-        if _same_gtin(str(food["gtinUpc"]), upc):
+        if any(_same_gtin(str(food["gtinUpc"]), code) for code in candidates):
             return food
     if with_gtin:
         return None
@@ -269,25 +298,24 @@ def _barcode_match(foods: list[dict], upc: str) -> Optional[dict]:
 async def search_by_barcode(upc: str) -> Optional[dict]:
     """
     Search for a branded food by its UPC/GTIN barcode.
-    USDA indexes GTINs in the branded food database.
+    USDA indexes GTINs in the branded food database (as UPC-A, so a UPC-E code is also
+    searched in its expanded form).
     """
-    params = {
-        "query": upc,
-        "dataType": "Branded",
-        "pageSize": 5,
-        "api_key": settings.USDA_API_KEY,
-    }
-
+    food = None
     async with httpx.AsyncClient(timeout=10.0) as client:
-        resp = await client.get(f"{USDA_BASE_URL}/foods/search", params=params)
-        if resp.status_code == 429:
+        for query in dict.fromkeys(code for code in (upc, expand_upce(upc)) if code):
+            resp = await client.get(
+                f"{USDA_BASE_URL}/foods/search",
+                params={"query": query, "dataType": "Branded", "pageSize": 5, "api_key": settings.USDA_API_KEY},
+            )
+            if resp.status_code == 429:
+                resp.raise_for_status()
+            if resp.status_code in (400, 403):
+                return None
             resp.raise_for_status()
-        if resp.status_code in (400, 403):
-            return None
-        resp.raise_for_status()
-        data = resp.json()
-
-    food = _barcode_match(data.get("foods", []), upc)
+            food = _barcode_match(resp.json().get("foods", []), upc)
+            if food is not None:
+                break
     if food is None:
         return None
 

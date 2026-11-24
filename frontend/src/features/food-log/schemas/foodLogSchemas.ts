@@ -25,7 +25,7 @@ export const barcodeSchema = z.object({
 });
 export type BarcodeForm = z.input<typeof barcodeSchema>;
 
-const QUANTITY_MESSAGE = `Enter an amount above 0 and up to ${FOOD_LIMITS.quantityMax}.`;
+const QUANTITY_MESSAGE = `Enter an amount from ${FOOD_LIMITS.quantityMin} to ${FOOD_LIMITS.quantityMax}.`;
 
 /** Edit sheet: quantity + unit (one of the units offered for the food). */
 export function portionSchema(units: readonly string[]) {
@@ -38,7 +38,8 @@ export function portionSchema(units: readonly string[]) {
         .pipe(
           z.coerce
             .number<string>({ error: QUANTITY_MESSAGE })
-            .positive(QUANTITY_MESSAGE)
+            // Portions are stored with 2 decimals, so anything below 0.01 would become 0.
+            .min(FOOD_LIMITS.quantityMin, QUANTITY_MESSAGE)
             .max(FOOD_LIMITS.quantityMax, QUANTITY_MESSAGE),
         ),
       unit: z.string().refine((unit) => units.includes(unit), 'Choose a unit from the list.'),
@@ -79,7 +80,7 @@ const foodItemSchema = z.object({
   fdcId: z.number().int().nullable(),
   foodName: z.string().min(1).max(255),
   brandName: z.string().max(255).nullable(),
-  quantity: z.number().positive().max(FOOD_LIMITS.quantityMax),
+  quantity: z.number().min(FOOD_LIMITS.quantityMin).max(FOOD_LIMITS.quantityMax),
   unit: z.string().min(1).max(50),
   per100g: z.object({
     calories: nutrient,

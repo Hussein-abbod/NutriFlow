@@ -90,3 +90,34 @@ def test_ai_endpoints_are_rate_limited(client, auth_headers, rate_limited):
 def test_coach_message_length_is_limited(client, auth_headers):
     response = client.post("/coach/message", json={"message": "x" * 2001}, headers=auth_headers)
     assert response.status_code == 422
+
+
+def test_validation_messages_have_no_pydantic_prefix(client, auth_headers):
+    payload = {"meal_type": "lunch", "log_date": "2999-01-01", "items": [{"food_name": "Rice"}]}
+    response = client.post("/food-log/submit", json=payload, headers=auth_headers)
+    assert response.status_code == 422
+    assert response.json()["detail"][0]["msg"] == "Meals can be logged at most 7 days ahead."
+
+
+def test_oversized_bodies_are_rejected_before_parsing(client, auth_headers):
+    from app.utils.request_size import MAX_REQUEST_BODY_BYTES
+
+    body = b"x" * (MAX_REQUEST_BODY_BYTES + 1)
+    response = client.post(
+        "/food-log/image",
+        content=body,
+        headers={**auth_headers, "Content-Type": "application/json", "Origin": ALLOWED_ORIGIN},
+    )
+    assert response.status_code == 413
+    assert response.json() == {"detail": "Request body is too large."}
+    assert response.headers["access-control-allow-origin"] == ALLOWED_ORIGIN
+
+
+def test_bodies_without_a_length_are_refused(client, auth_headers):
+    def chunks():
+        yield b'{"query": "rice", "meal_type": "lunch"}'
+
+    response = client.post(
+        "/food-log/text", content=chunks(), headers={**auth_headers, "Content-Type": "application/json"}
+    )
+    assert response.status_code == 411

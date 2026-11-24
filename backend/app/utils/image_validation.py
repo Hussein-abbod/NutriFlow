@@ -12,7 +12,8 @@ from dataclasses import dataclass
 from fastapi import HTTPException, status
 
 MAX_IMAGE_BYTES = 5 * 1024 * 1024  # 5 MB
-# Longest base64 text that can decode to MAX_IMAGE_BYTES; anything longer is rejected unread.
+# Longest base64 text that can decode to MAX_IMAGE_BYTES; anything longer is rejected before
+# decoding. (Whole-request size is capped earlier by utils/request_size.py.)
 MAX_BASE64_CHARS = 4 * math.ceil(MAX_IMAGE_BYTES / 3)
 
 _PNG_SIGNATURE = b"\x89PNG\r\n\x1a\n"

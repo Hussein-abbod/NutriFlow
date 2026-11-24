@@ -56,9 +56,9 @@ describe('portionSchema', () => {
     });
   });
 
-  it.each(['', '0', '-5', 'abc', '10001'])('rejects the amount %j', (quantity) => {
+  it.each(['', '0', '0.004', '-5', 'abc', '10001'])('rejects the amount %j', (quantity) => {
     expect(firstError(schema.safeParse({ quantity, unit: 'g' }))).toBe(
-      'Enter an amount above 0 and up to 10000.',
+      'Enter an amount from 0.01 to 10000.',
     );
   });
 

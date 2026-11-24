@@ -9,7 +9,9 @@ import asyncio
 import logging
 from dataclasses import dataclass
 
+import httpx
 from fastapi import HTTPException, status
+from tenacity import RetryError
 
 from app.schemas.food_log import QUANTITY_MAX, FoodItemResult
 from app.services import advice_agent, usda_client
@@ -56,10 +58,13 @@ def _valid_quantity(value: object) -> float:
 
 
 async def _from_usda(call):
-    """Await a USDA call; outages (network, 5xx, exhausted retries) become a 503."""
+    """
+    Await a USDA call; outages (network, 5xx, exhausted retries) become a 503. Other errors
+    are bugs and propagate as a 500 with a traceback.
+    """
     try:
         return await call
-    except Exception as exc:
+    except (httpx.HTTPError, RetryError) as exc:
         logger.warning("USDA lookup failed: %s", type(exc).__name__)
         raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=USDA_UNAVAILABLE) from exc
 

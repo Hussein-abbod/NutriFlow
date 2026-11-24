@@ -100,7 +100,7 @@ describe('BarcodeScannerPanel', () => {
 
   it('explains an unknown barcode and scans again on Retry', async () => {
     cameraWorks();
-    lookupReturns({});
+    const codes = lookupReturns({});
     const { user } = renderPanel();
     await screen.findByText('Point the camera at a barcode');
 
@@ -108,9 +108,32 @@ describe('BarcodeScannerPanel', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent(
       'No food found for barcode: 4006381333931',
     );
+    // The code stays in view: further reads must not hammer the API (rate limit).
+    act(() => detect('4006381333931'));
+    act(() => detect('4006381333931'));
+    expect(codes).toEqual(['4006381333931']);
+
     await user.click(screen.getByRole('button', { name: 'Retry' }));
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
     expect(scanner.start).toHaveBeenCalledTimes(1); // the camera kept running
+    act(() => detect('4006381333931'));
+    await screen.findByRole('alert');
+    expect(codes).toEqual(['4006381333931', '4006381333931']);
+  });
+
+  it('still accepts a typed barcode after a failed scan', async () => {
+    cameraWorks();
+    const codes = lookupReturns();
+    const { user } = renderPanel();
+    await screen.findByText('Point the camera at a barcode');
+    act(() => detect('4006381333931'));
+    await screen.findByRole('alert');
+
+    await user.click(screen.getByRole('button', { name: 'Enter barcode manually' }));
+    await user.type(screen.getByRole('textbox', { name: 'Barcode number' }), '012345678905');
+    await user.click(screen.getByRole('button', { name: 'Look up' }));
+    expect(await screen.findByRole('region', { name: 'Grilled Chicken Strips' })).toBeVisible();
+    expect(codes).toEqual(['4006381333931', '012345678905']);
   });
 
   it('can rescan after a product was found', async () => {
