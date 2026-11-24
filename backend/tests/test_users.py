@@ -211,3 +211,14 @@ def test_profile_edit_spreads_the_goal_over_the_weeks_left(client, onboarded_hea
 def test_profile_edit_below_the_target_weight_switches_to_maintenance(client, onboarded_headers):
     response = client.put("/users/profile", json={"weight_kg": 64}, headers=onboarded_headers)
     assert response.json()["daily_calories_target"] == _plan("maintain_weight", 64, None).daily_calories
+
+
+def test_profile_edit_after_the_goal_period_ended_uses_the_whole_period(client, onboarded_headers, db_session):
+    from datetime import date, timedelta
+
+    goal = db_session.query(Goal).filter(Goal.is_active.is_(True)).one()
+    goal.target_date = date.today() - timedelta(days=3)
+    db_session.commit()
+
+    response = client.put("/users/profile", json={"weight_kg": 68}, headers=onboarded_headers)
+    assert response.json()["daily_calories_target"] == _plan("lose_weight", 68, 10).daily_calories

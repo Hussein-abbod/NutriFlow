@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { http, HttpResponse } from 'msw';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { tokenStore } from '@/lib/api';
+import { useNotificationSettings } from '@/lib/notifications/notificationSettings';
 import { sessionHandlers } from '@/test/authHandlers';
 import { coachServer } from '@/test/coachHandlers';
 import { buildUser, TEST_API } from '@/test/fixtures';
@@ -66,9 +67,12 @@ describe('splash + route guards', () => {
         return new HttpResponse(null, { status: 204 });
       }),
     );
+    useNotificationSettings.getState().setRemindersEnabled(true);
     const { router } = renderApp('/profile');
     await userEvent.click(await screen.findByRole('button', { name: 'Logout' }));
     await waitFor(() => expect(router.state.location.pathname).toBe('/login'));
+    // The next person on this browser decides about reminders themselves.
+    expect(useNotificationSettings.getState().remindersEnabled).toBe(false);
     expect(logoutCalls).toBe(1);
     expect(tokenStore.getAccessToken()).toBeNull();
   });

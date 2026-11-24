@@ -5,6 +5,7 @@ The conversation memory is the stored chat history (passed in by coach_service),
 survives restarts, is shared by all workers and is gone when the user clears the chat.
 """
 
+import json
 import logging
 from collections.abc import Sequence
 from datetime import date, timedelta
@@ -40,6 +41,18 @@ def _sum(logs: Sequence[FoodLog], field: str) -> float:
     return sum(getattr(log, field) or 0 for log in logs)
 
 
+def _allergy_list(stored: object) -> list[str]:
+    """Allergies as a list; early Flutter rows stored the JSON list as a string."""
+    if isinstance(stored, str):
+        try:
+            stored = json.loads(stored)
+        except ValueError:
+            return [stored] if stored.strip() else []
+    if not isinstance(stored, list):
+        return []
+    return [str(item) for item in stored]
+
+
 def build_user_context(db: Session, user: User, today: date | None = None) -> str:
     """The user's profile, goal and recent intake as plain text for the system prompt."""
     day = today or date.today()
@@ -71,7 +84,7 @@ def build_user_context(db: Session, user: User, today: date | None = None) -> st
         else "No log data for the past 7 days."
     )
 
-    allergies = ", ".join(user.food_allergies or []) or "None"
+    allergies = ", ".join(_allergy_list(user.food_allergies)) or "None"
     return (
         "USER PROFILE:\n"
         f"Age: {user.age or 'Unknown'}, Gender: {user.gender or 'Unknown'}, "

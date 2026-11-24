@@ -34,7 +34,10 @@ def apply_daily_targets(user: User, goal: Goal | None, today: date | None = None
     if goal is not None:
         goal_type = goal.goal_type.value
         target_weight = goal.target_weight
-        period_weeks = max(1, math.ceil((goal.target_date - day).days / 7))
+        # After the period ended (until it is extended or reset) there are no weeks left;
+        # use the whole period instead of cramming the rest into one week.
+        if goal.target_date > day:
+            period_weeks = max(1, math.ceil((goal.target_date - day).days / 7))
     if _target_reached(goal_type, user.weight_kg, target_weight):
         goal_type = "maintain_weight"
 

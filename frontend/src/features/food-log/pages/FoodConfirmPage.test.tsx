@@ -204,6 +204,21 @@ describe('FoodConfirmPage', () => {
     expect(router.state.location.pathname).toBe('/food-log');
   });
 
+  it('still goes to login when the session expires while the meal is being logged', async () => {
+    const { router, userEvents } = renderConfirm();
+    const logMeal = await screen.findByRole('button', { name: 'Log Meal' });
+    server.use(
+      http.post(`${TEST_API}/food-log/submit`, () =>
+        HttpResponse.json({ detail: 'Could not validate credentials' }, { status: 401 }),
+      ),
+      http.post(`${TEST_API}/auth/refresh`, () =>
+        HttpResponse.json({ detail: 'Refresh token missing.' }, { status: 401 }),
+      ),
+    );
+    await userEvents.click(logMeal);
+    await waitFor(() => expect(router.state.location.pathname).toBe('/login'));
+  });
+
   it('keeps the foods and shows the error when logging fails', async () => {
     server.use(submitHandler([], true));
     const { router, userEvents } = renderConfirm();

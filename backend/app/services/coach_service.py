@@ -4,6 +4,7 @@ authenticated user.
 """
 
 from fastapi import HTTPException, status
+from fastapi.concurrency import run_in_threadpool
 from sqlalchemy.orm import Session
 
 from app.models.coach_message import CoachMessage, MessageRole
@@ -38,14 +39,8 @@ def _advice_to_discuss(db: Session, user: User, food_log_id: int) -> str:
     return log.ai_advice
 
 
-async def send_message(db: Session, user: User, data: CoachMessageRequest) -> CoachMessage:
-    """
-    Ask the coach and store the exchange. Nothing is stored when the model fails (503), so
-    a retry does not duplicate the question.
-
-    With `food_log_id` the meal's advice is added to the chat as a coach message and the
-    coach acknowledges it; the instruction sent to the model is not stored.
-    """
+def _prepare(db: Session, user: User, data: CoachMessageRequest):
+    """The model's input: (user context, earlier messages, prompt, message to store first)."""
     history = recent_messages(db, user, MEMORY_WINDOW)
     if data.food_log_id is not None:
         advice = _advice_to_discuss(db, user, data.food_log_id)
@@ -58,12 +53,10 @@ async def send_message(db: Session, user: User, data: CoachMessageRequest) -> Co
     else:
         prompt = data.message
         opening = CoachMessage(user_id=user.id, role=MessageRole.USER, content=data.message)
+    return coach_agent.build_user_context(db, user), history, prompt, opening
 
-    try:
-        reply_text = await coach_agent.generate_reply(coach_agent.build_user_context(db, user), history, prompt)
-    except coach_agent.CoachUnavailableError as exc:
-        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=COACH_UNAVAILABLE) from exc
 
+def _store(db: Session, user: User, opening: CoachMessage, reply_text: str) -> CoachMessage:
     reply = CoachMessage(user_id=user.id, role=MessageRole.ASSISTANT, content=reply_text)
     db.add(opening)
     db.flush()  # the opening gets the lower id, so it sorts first within the same second
@@ -71,6 +64,23 @@ async def send_message(db: Session, user: User, data: CoachMessageRequest) -> Co
     db.commit()
     db.refresh(reply)
     return reply
+
+
+async def send_message(db: Session, user: User, data: CoachMessageRequest) -> CoachMessage:
+    """
+    Ask the coach and store the exchange. Nothing is stored when the model fails (503), so
+    a retry does not duplicate the question.
+
+    With `food_log_id` the meal's advice is added to the chat as a coach message and the
+    coach acknowledges it; the instruction sent to the model is not stored. Database work
+    runs in the threadpool (sync session), so it never blocks the event loop.
+    """
+    context, history, prompt, opening = await run_in_threadpool(_prepare, db, user, data)
+    try:
+        reply_text = await coach_agent.generate_reply(context, history, prompt)
+    except coach_agent.CoachUnavailableError as exc:
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=COACH_UNAVAILABLE) from exc
+    return await run_in_threadpool(_store, db, user, opening, reply_text)
 
 
 def clear_history(db: Session, user: User) -> None:

@@ -200,3 +200,29 @@ def test_clear_history_deletes_the_rows(client, auth_headers, llm, db_session):
     ask(client, auth_headers)
     assert client.delete("/coach/history", headers=auth_headers).status_code == 204
     assert db_session.query(CoachMessage).count() == 0
+
+
+@pytest.mark.parametrize(
+    "stored, expected",
+    [('["Peanuts", "Fish"]', "Peanuts, Fish"), ("Kiwi", "Kiwi"), ("", "None"), (None, "None"), (["Soy"], "Soy")],
+)
+def test_allergies_are_read_from_lists_and_legacy_json_strings(stored, expected):
+    from types import SimpleNamespace
+
+    class NoRows:
+        def query(self, *args):
+            return self
+
+        def filter(self, *args):
+            return self
+
+        def first(self):
+            return None
+
+        def all(self):
+            return []
+
+    user = SimpleNamespace(
+        id=1, age=30, gender="female", height_cm=165, weight_kg=70, food_allergies=stored, daily_calories_target=None
+    )
+    assert f"Allergies: {expected}\n" in coach_agent.build_user_context(NoRows(), user)

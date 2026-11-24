@@ -22,7 +22,7 @@ export const newPasswordField = z
   .max(PASSWORD_MAX_LENGTH, `Max ${PASSWORD_MAX_LENGTH} characters`)
   .refine((value) => utf8ByteLength(value) <= PASSWORD_MAX_LENGTH, 'Password is too long')
   .refine(
-    (value) => /\p{L}/u.test(value) && /\p{N}/u.test(value),
+    (value) => /\p{L}/u.test(value) && /\p{Nd}/u.test(value),
     'Use at least one letter and one number',
   )
   .refine((value) => value.trim() === value, 'Remove the space at the start or end');

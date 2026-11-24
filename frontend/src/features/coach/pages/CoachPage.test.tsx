@@ -1,6 +1,6 @@
 import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { http, HttpResponse } from 'msw';
+import { delay, http, HttpResponse } from 'msw';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { sessionHandlers } from '@/test/authHandlers';
 import { buildCoachMessage, coachServer, type CoachServerOptions } from '@/test/coachHandlers';
@@ -84,6 +84,31 @@ describe('CoachPage', () => {
     expect(coach.requests).toEqual([]);
     await userEvents.keyboard('{Enter}');
     await waitFor(() => expect(coach.requests).toEqual([{ message: 'Line one\nLine two' }]));
+  });
+
+  it('keeps the earlier conversation when a message is sent before it has loaded', async () => {
+    const coach = coachServer([buildCoachMessage('assistant', 'Earlier advice', 1)]);
+    let firstLoad = true;
+    server.use(
+      http.get(`${TEST_API}/coach/history`, async () => {
+        if (firstLoad) {
+          firstLoad = false;
+          await delay(300);
+        }
+        return HttpResponse.json(coach.messages);
+      }),
+      ...sessionHandlers(user),
+      ...coach.handlers,
+    );
+    renderApp('/coach');
+    await userEvent.type(
+      await screen.findByRole('textbox', { name: 'Message Coach AI' }),
+      'Hi{Enter}',
+    );
+
+    const list = await conversation();
+    expect(await within(list).findByText('Coach reply to: Hi')).toBeVisible();
+    expect(await within(list).findByText('Earlier advice')).toBeVisible();
   });
 
   it('asks a suggested question with one tap', async () => {

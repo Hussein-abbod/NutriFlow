@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useBlocker, useNavigate } from 'react-router';
 import { showSnackbar } from '@/components';
+import { useSessionStore } from '@/features/auth';
 import { getErrorMessage } from '@/lib/api';
 import { useSubmitFoodLog } from '../api/useFoodLogQueries';
 import { toIsoDay } from '../model/dates';
@@ -26,7 +27,10 @@ export function useFoodConfirm(target: AddFoodTarget, initial: ConfirmState) {
   const [editingKey, setEditingKey] = useState<string | null>(null);
   // A ref, not `isPending`: it must be false *before* our own navigation in onSuccess.
   const submittingRef = useRef(false);
-  const blocker = useBlocker(() => submittingRef.current);
+  // Only while signed in: a session-expired redirect to login must never be swallowed.
+  const blocker = useBlocker(
+    () => submittingRef.current && useSessionStore.getState().status === 'authenticated',
+  );
 
   useEffect(() => {
     if (blocker.state === 'blocked') blocker.reset();

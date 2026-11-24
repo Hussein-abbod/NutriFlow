@@ -46,6 +46,8 @@ export function useSendCoachMessage() {
     onSuccess: (reply) =>
       queryClient.setQueryData<Messages>(coachKeys.history(), (old = []) => [...old, reply]),
     onError: (_error, _message, context) => removeLocal(queryClient, context?.localId),
+    // Sending may have cancelled the first history load: reload the stored conversation.
+    onSettled: () => queryClient.invalidateQueries({ queryKey: coachKeys.history() }),
   });
 }
 

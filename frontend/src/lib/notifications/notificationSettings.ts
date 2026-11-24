@@ -44,6 +44,16 @@ export const useNotificationSettings = create<NotificationSettingsState>((set) =
   },
 }));
 
+/**
+ * Forget this device's reminder choices (logout, session expiry): the next person to sign in
+ * on this browser decides for themselves.
+ */
+export function resetNotificationSettings() {
+  write(REMINDERS_KEY, null);
+  write(TARGET_NOTIFIED_KEY, null);
+  useNotificationSettings.setState({ remindersEnabled: false });
+}
+
 /** True the first time it is called for `isoDay` (the celebration shows once a day). */
 export function claimTargetNotification(isoDay: string): boolean {
   if (read(TARGET_NOTIFIED_KEY) === isoDay) return false;
