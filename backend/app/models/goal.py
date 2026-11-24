@@ -1,7 +1,7 @@
 """Goal model for NutriFlow."""
 
 from sqlalchemy import (
-    Column, Integer, Float, String, Boolean, Text, Date, DateTime,
+    Column, Integer, Float, Boolean, Text, Date, DateTime,
     ForeignKey, Enum,
 )
 from sqlalchemy.orm import relationship

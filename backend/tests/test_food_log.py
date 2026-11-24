@@ -6,16 +6,8 @@ import pytest
 
 from app.models.food_log import FoodLog, FoodLogItem, LogMethod, MealType
 from app.services import advice_agent
+from tests.helpers import RICE, submit
 
-RICE = {
-    "food_name": "Rice, white, cooked",
-    "quantity": 200,
-    "unit": "g",
-    "calories": 260,
-    "protein": 5.4,
-    "carbs": 56,
-    "fat": 0.6,
-}
 EGG = {
     "food_name": "Egg, whole, raw",
     "quantity": 2,
@@ -25,11 +17,6 @@ EGG = {
     "carbs": 1,
     "fat": 11.4,
 }
-
-
-def submit(client, headers, items=None, **extra):
-    payload = {"meal_type": "breakfast", "log_method": "text", "items": items or [RICE], **extra}
-    return client.post("/food-log/submit", json=payload, headers=headers)
 
 
 def user_id(client, headers) -> int:

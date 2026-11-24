@@ -1,7 +1,7 @@
 """User model for NutriFlow."""
 
 from sqlalchemy import (
-    Column, Integer, String, Float, Boolean, Text, Enum, DateTime, JSON
+    Column, Integer, String, Float, Boolean, Enum, DateTime, JSON
 )
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
@@ -34,6 +34,8 @@ class User(Base):
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     email = Column(String(255), unique=True, nullable=False, index=True)
     hashed_password = Column(String(255), nullable=False)
+    # Stamped into every JWT ("ver"); bumping it (password change) ends all other sessions.
+    token_version = Column(Integer, nullable=False, default=0, server_default="0")
     full_name = Column(String(255), nullable=True)
 
     # Profile fields

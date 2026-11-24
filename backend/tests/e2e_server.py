@@ -15,7 +15,7 @@ import os
 os.environ["CORS_ORIGINS"] = "http://localhost:5174"
 
 from app.main import app  # noqa: E402
-from app.services import advice_agent, usda_client  # noqa: E402
+from app.services import advice_agent, coach_agent, usda_client  # noqa: E402
 
 # Per-100 g values, roughly USDA SR Legacy.
 FAKE_FOODS = [
@@ -60,10 +60,17 @@ def fake_meal_advice(**kwargs) -> str:
     )
 
 
+async def fake_coach_reply(user_context: str, history, message: str) -> str:
+    if message.startswith("The user wants to discuss this meal advice"):
+        return "Happy to talk about this meal. What would you like to know?"
+    return f"Coach says: try more vegetables with \"{message[:60]}\"."
+
+
 usda_client.search_foods = fake_search_foods
 usda_client.search_by_barcode = fake_search_by_barcode
 advice_agent.parse_food_text = fake_parse_food_text
 advice_agent.identify_foods_from_image = fake_identify_foods_from_image
 advice_agent.generate_meal_advice = fake_meal_advice
+coach_agent.generate_reply = fake_coach_reply
 
 __all__ = ["app"]

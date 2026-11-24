@@ -3,7 +3,6 @@ Dashboard service: today's totals, the last 7 days, goal progress and goal actio
 Every query is scoped to the authenticated user passed in.
 """
 
-import math
 from datetime import date, timedelta
 
 from fastapi import HTTPException, status
@@ -19,7 +18,7 @@ from app.schemas.dashboard import (
     MealSummary,
     TodaySummaryOut,
 )
-from app.utils.calorie_calculator import calculate_nutrition_plan
+from app.services.targets_service import apply_daily_targets
 
 # Fallbacks for users without calculated targets (same values the Flutter app assumed).
 DEFAULT_CALORIES = 2000
@@ -120,14 +119,6 @@ def reset_goal(db: Session, user: User) -> None:
     db.commit()
 
 
-def _target_reached(goal_type: str, current_kg: float, target_kg: float) -> bool:
-    if goal_type == "lose_weight":
-        return current_kg <= target_kg
-    if goal_type == "gain_weight":
-        return current_kg >= target_kg
-    return False
-
-
 def extend_goal(db: Session, user: User, extra_weeks: int, today: date | None = None) -> None:
     """
     Push the target date back (from today if the goal already ended) and spread the weight
@@ -141,25 +132,8 @@ def extend_goal(db: Session, user: User, extra_weeks: int, today: date | None = 
     goal.target_date = max(goal.target_date, day) + timedelta(weeks=extra_weeks)
     goal.is_extended = True
 
-    goal_type = goal.goal_type.value
-    if goal_type != "maintain_weight":
+    if goal.goal_type.value != "maintain_weight":
         # Maintain goals keep `goal_period_weeks = None` (see onboarding_service).
         user.goal_period_weeks = max(1, round((goal.target_date - goal.start_date).days / 7))
-        if _target_reached(goal_type, user.weight_kg, goal.target_weight):
-            goal_type = "maintain_weight"
-
-    plan = calculate_nutrition_plan(
-        weight_kg=user.weight_kg,
-        height_cm=user.height_cm,
-        age=user.age,
-        gender=user.gender,
-        activity_level=user.activity_level.value,
-        goal_type=goal_type,
-        target_weight_kg=goal.target_weight,
-        period_weeks=max(1, math.ceil((goal.target_date - day).days / 7)),
-    )
-    user.daily_calories_target = goal.daily_calories = plan.daily_calories
-    user.daily_protein_target = goal.daily_protein = plan.daily_protein
-    user.daily_carbs_target = goal.daily_carbs = plan.daily_carbs
-    user.daily_fat_target = goal.daily_fat = plan.daily_fat
+    apply_daily_targets(user, goal, day)
     db.commit()

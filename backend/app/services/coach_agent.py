@@ -1,156 +1,109 @@
 """
-Coach AI agent for NutriFlow.
-Uses LangChain + Groq to provide personalized nutrition advice.
+Coach AI agent for NutriFlow: LangChain + Groq with the user's data as context.
+
+The conversation memory is the stored chat history (passed in by coach_service), so it
+survives restarts, is shared by all workers and is gone when the user clears the chat.
 """
 
-from typing import List, Dict, Any
-from sqlalchemy.orm import Session
+import logging
+from collections.abc import Sequence
 from datetime import date, timedelta
 
-from app.services.llm_config import get_groq_llm
-from app.models.user import User
-from app.models.goal import Goal
+from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, SystemMessage
+from sqlalchemy.orm import Session
+
+from app.models.coach_message import CoachMessage, MessageRole
 from app.models.food_log import FoodLog
-from app.models.coach_message import CoachMessage
+from app.models.goal import Goal
+from app.models.user import User
+from app.services.llm_config import get_groq_llm
 
-from langchain_core.chat_history import InMemoryChatMessageHistory
-from langchain_core.runnables.history import RunnableWithMessageHistory
+logger = logging.getLogger(__name__)
 
-# Store conversation memory per user ID
-_user_histories: Dict[int, InMemoryChatMessageHistory] = {}
-
-def get_session_history(session_id: str):
-    """Get or create InMemoryChatMessageHistory for a user."""
-    user_id = int(session_id)
-    if user_id not in _user_histories:
-        _user_histories[user_id] = InMemoryChatMessageHistory()
-    
-    # Keep only the last 20 messages (10 exchanges) to simulate window memory
-    if len(_user_histories[user_id].messages) > 20:
-        _user_histories[user_id].messages = _user_histories[user_id].messages[-20:]
-        
-    return _user_histories[user_id]
-
-def clear_user_memory(user_id: int):
-    """Clear the in-memory chat history for a user."""
-    if user_id in _user_histories:
-        _user_histories[user_id].clear()
-
-def get_user_context(db: Session, user: User) -> str:
-    """Compile all relevant user data into a prompt context."""
-    # Active goal
-    active_goal = db.query(Goal).filter(
-        Goal.user_id == user.id, Goal.is_active == True
-    ).first()
-    
-    goal_str = "No active goal."
-    if active_goal:
-        goal_str = (
-            f"Goal: {active_goal.goal_type.value}. "
-            f"Start weight: {active_goal.start_weight}kg, Target weight: {active_goal.target_weight}kg. "
-            f"Days remaining: {(active_goal.target_date - date.today()).days} days."
-        )
-
-    # Today's logs
-    today = date.today()
-    today_logs = db.query(FoodLog).filter(
-        FoodLog.user_id == user.id, FoodLog.log_date == today
-    ).all()
-    
-    today_cal = sum(log.total_calories or 0 for log in today_logs)
-    today_pro = sum(log.total_protein or 0 for log in today_logs)
-    today_carbs = sum(log.total_carbs or 0 for log in today_logs)
-    today_fat = sum(log.total_fat or 0 for log in today_logs)
-    
-    today_str = (
-        f"Today's intake: {today_cal:.0f} kcal, {today_pro:.0f}g protein, "
-        f"{today_carbs:.0f}g carbs, {today_fat:.0f}g fat. "
-        f"Target: {user.daily_calories_target or 2000:.0f} kcal."
-    )
-
-    # Last 7 days summary
-    seven_days_ago = today - timedelta(days=7)
-    recent_logs = db.query(FoodLog).filter(
-        FoodLog.user_id == user.id, 
-        FoodLog.log_date >= seven_days_ago,
-        FoodLog.log_date < today
-    ).all()
-    
-    if recent_logs:
-        avg_cal = sum(log.total_calories or 0 for log in recent_logs) / 7
-        weekly_str = f"Avg calories last 7 days: {avg_cal:.0f} kcal/day."
-    else:
-        weekly_str = "No log data for the past 7 days."
-
-    # Profile
-    allergies = user.food_allergies or []
-    if isinstance(allergies, str):
-        import json
-        try:
-            allergies = json.loads(allergies)
-        except:
-            allergies = []
-    
-    allergies_str = ", ".join(allergies) if allergies else "None"
-
-    context = f"""
-    USER PROFILE:
-    Age: {user.age or 'Unknown'}, Gender: {user.gender or 'Unknown'}, 
-    Height: {user.height_cm or 'Unknown'}cm, Weight: {user.weight_kg or 'Unknown'}kg
-    Allergies: {allergies_str}
-    
-    GOAL STATUS:
-    {goal_str}
-    
-    DIETARY LOG:
-    {today_str}
-    {weekly_str}
-    """
-    return context
-
-def generate_coach_response(db: Session, user: User, message: str) -> str:
-    """Generate a response using the Coach AI agent."""
-    llm = get_groq_llm()
-    if not llm:
-        return "I'm currently unavailable. Please check your API keys."
-
-    from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
-
-    user_context = get_user_context(db, user)
-    
-    system_prompt = f"""You are NutriFlow's personal nutrition coach. You have full 
-access to the user's dietary data, goals, and health profile. 
-Your role is to provide personalised, evidence-based nutrition 
-and dietary advice. You are friendly, motivating, and practical. 
-Always tailor advice to the user's specific goal, remaining daily targets, and 
-food allergies. Never recommend foods the user is allergic to. 
+SYSTEM_PROMPT = """You are NutriFlow's personal nutrition coach. You have full
+access to the user's dietary data, goals, and health profile.
+Your role is to provide personalised, evidence-based nutrition
+and dietary advice. You are friendly, motivating, and practical.
+Always tailor advice to the user's specific goal, remaining daily targets, and
+food allergies. Never recommend foods the user is allergic to.
 Keep responses clear, concise, and conversational. Do not use markdown formatting like bolding or lists unless necessary.
 
 Current Context:
-{user_context}
 """
 
-    prompt = ChatPromptTemplate.from_messages([
-        ("system", system_prompt),
-        MessagesPlaceholder(variable_name="chat_history"),
-        ("human", "{input}")
-    ])
-    
-    # New LCEL syntax
-    chain = prompt | llm
-    chain_with_history = RunnableWithMessageHistory(
-        chain,
-        get_session_history,
-        input_messages_key="input",
-        history_messages_key="chat_history"
+
+class CoachUnavailableError(Exception):
+    """The language model is not configured, failed, or returned nothing."""
+
+
+def _sum(logs: Sequence[FoodLog], field: str) -> float:
+    return sum(getattr(log, field) or 0 for log in logs)
+
+
+def build_user_context(db: Session, user: User, today: date | None = None) -> str:
+    """The user's profile, goal and recent intake as plain text for the system prompt."""
+    day = today or date.today()
+    goal = db.query(Goal).filter(Goal.user_id == user.id, Goal.is_active.is_(True)).first()
+    goal_text = "No active goal."
+    if goal:
+        goal_text = (
+            f"Goal: {goal.goal_type.value}. "
+            f"Start weight: {goal.start_weight}kg, Target weight: {goal.target_weight}kg. "
+            f"Days remaining: {(goal.target_date - day).days} days."
+        )
+
+    today_logs = db.query(FoodLog).filter(FoodLog.user_id == user.id, FoodLog.log_date == day).all()
+    today_text = (
+        f"Today's intake: {_sum(today_logs, 'total_calories'):.0f} kcal, "
+        f"{_sum(today_logs, 'total_protein'):.0f}g protein, "
+        f"{_sum(today_logs, 'total_carbs'):.0f}g carbs, {_sum(today_logs, 'total_fat'):.0f}g fat. "
+        f"Target: {user.daily_calories_target or 2000:.0f} kcal."
     )
 
+    recent_logs = (
+        db.query(FoodLog)
+        .filter(FoodLog.user_id == user.id, FoodLog.log_date >= day - timedelta(days=7), FoodLog.log_date < day)
+        .all()
+    )
+    weekly_text = (
+        f"Avg calories last 7 days: {_sum(recent_logs, 'total_calories') / 7:.0f} kcal/day."
+        if recent_logs
+        else "No log data for the past 7 days."
+    )
+
+    allergies = ", ".join(user.food_allergies or []) or "None"
+    return (
+        "USER PROFILE:\n"
+        f"Age: {user.age or 'Unknown'}, Gender: {user.gender or 'Unknown'}, "
+        f"Height: {user.height_cm or 'Unknown'}cm, Weight: {user.weight_kg or 'Unknown'}kg\n"
+        f"Allergies: {allergies}\n\n"
+        f"GOAL STATUS:\n{goal_text}\n\n"
+        f"DIETARY LOG:\n{today_text}\n{weekly_text}\n"
+    )
+
+
+def _as_llm_message(message: CoachMessage) -> BaseMessage:
+    if message.role == MessageRole.USER:
+        return HumanMessage(content=message.content)
+    return AIMessage(content=message.content)
+
+
+async def generate_reply(user_context: str, history: Sequence[CoachMessage], message: str) -> str:
+    """The coach's answer to `message`, given the earlier chat. Raises CoachUnavailableError."""
+    llm = get_groq_llm()
+    if llm is None:
+        raise CoachUnavailableError("No language model configured.")
+    prompt = [
+        SystemMessage(content=SYSTEM_PROMPT + user_context),
+        *(_as_llm_message(item) for item in history),
+        HumanMessage(content=message),
+    ]
     try:
-        response = chain_with_history.invoke(
-            {"input": message},
-            config={"configurable": {"session_id": str(user.id)}}
-        )
-        return response.content.strip()
-    except Exception as e:
-        print(f"Error generating coach response: {e}")
-        return "Sorry, I encountered an error processing your request."
+        response = await llm.ainvoke(prompt)
+    except Exception as exc:  # provider/network errors vary by LangChain integration
+        logger.warning("Coach LLM call failed: %s", type(exc).__name__)
+        raise CoachUnavailableError("The language model call failed.") from exc
+    reply = str(response.content).strip()
+    if not reply:
+        raise CoachUnavailableError("The language model returned an empty reply.")
+    return reply

@@ -104,6 +104,23 @@ def decode_token(token: str, expected_type: TokenType) -> dict:
     return payload
 
 
+def user_for_token(db: Session, payload: dict) -> User:
+    """
+    The user a decoded token belongs to. 401 when the user is gone or the token predates
+    the user's latest password change (its "ver" no longer matches).
+    """
+    try:
+        user_id = int(payload["sub"])
+    except (TypeError, ValueError):
+        raise _credentials_exception()
+    user = db.query(User).filter(User.id == user_id).first()
+    if user is None:
+        raise _credentials_exception("User not found")
+    if payload.get("ver", 0) != user.token_version:
+        raise _credentials_exception("Session ended. Please log in again.")
+    return user
+
+
 def revoke_token(token: str) -> None:
     """Revoke a token by its jti. Invalid / expired tokens are ignored."""
     try:
@@ -125,12 +142,4 @@ def get_current_user(
     db: Session = Depends(get_db),
 ) -> User:
     """Dependency: extract the current user from a valid *access* token."""
-    payload = decode_token(token, expected_type="access")
-    try:
-        user_id = int(payload["sub"])
-    except (TypeError, ValueError):
-        raise _credentials_exception()
-    user = db.query(User).filter(User.id == user_id).first()
-    if user is None:
-        raise _credentials_exception("User not found")
-    return user
+    return user_for_token(db, decode_token(token, expected_type="access"))

@@ -9,7 +9,8 @@ from sqlalchemy.orm import Session
 from app.models.goal import Goal
 from app.models.user import User
 from app.schemas.user import PasswordChangeRequest, ProfileUpdateRequest
-from app.utils.calorie_calculator import calculate_nutrition_plan
+from app.services.auth_service import TokenPair, generate_tokens
+from app.services.targets_service import apply_daily_targets
 from app.utils.security import hash_password, verify_password
 
 _BODY_FIELDS = ("age", "height_cm", "weight_kg")
@@ -19,31 +20,12 @@ def _recalculate_targets(db: Session, user: User) -> None:
     """Recompute daily targets after a body-metric change (only for finished profiles)."""
     if not (user.is_profile_complete and user.goal_type and user.activity_level and user.gender):
         return
-    plan = calculate_nutrition_plan(
-        weight_kg=user.weight_kg,
-        height_cm=user.height_cm,
-        age=user.age,
-        gender=user.gender,
-        activity_level=user.activity_level.value,
-        goal_type=user.goal_type.value,
-        target_weight_kg=user.goal_weight_kg,
-        period_weeks=user.goal_period_weeks,
-    )
-    user.daily_calories_target = plan.daily_calories
-    user.daily_protein_target = plan.daily_protein
-    user.daily_carbs_target = plan.daily_carbs
-    user.daily_fat_target = plan.daily_fat
-
     active_goal = (
         db.query(Goal)
         .filter(Goal.user_id == user.id, Goal.is_active.is_(True))
         .first()
     )
-    if active_goal:
-        active_goal.daily_calories = plan.daily_calories
-        active_goal.daily_protein = plan.daily_protein
-        active_goal.daily_carbs = plan.daily_carbs
-        active_goal.daily_fat = plan.daily_fat
+    apply_daily_targets(user, active_goal)
 
 
 def update_profile(db: Session, user: User, data: ProfileUpdateRequest) -> User:
@@ -66,14 +48,21 @@ def update_profile(db: Session, user: User, data: ProfileUpdateRequest) -> User:
     return user
 
 
-def change_password(db: Session, user: User, data: PasswordChangeRequest) -> None:
+def change_password(db: Session, user: User, data: PasswordChangeRequest) -> TokenPair:
+    """
+    Set a new password and end every session (all tokens carry the old token version).
+    Returns a new token pair for the device that made the change.
+    """
     if not verify_password(data.current_password, user.hashed_password):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Incorrect current password",
         )
     user.hashed_password = hash_password(data.new_password)
+    user.token_version = (user.token_version or 0) + 1
     db.commit()
+    db.refresh(user)
+    return generate_tokens(user)
 
 
 def update_allergies(db: Session, user: User, allergies: list[str]) -> list[str]:

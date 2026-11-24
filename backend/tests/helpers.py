@@ -26,3 +26,20 @@ def register(client: TestClient, email: str, password: str = DEFAULT_PASSWORD, *
 
 def bearer(access_token: str) -> dict:
     return {"Authorization": f"Bearer {access_token}"}
+
+
+RICE = {
+    "food_name": "Rice, white, cooked",
+    "quantity": 200,
+    "unit": "g",
+    "calories": 260,
+    "protein": 5.4,
+    "carbs": 56,
+    "fat": 0.6,
+}
+
+
+def submit(client: TestClient, headers: dict, items=None, **extra):
+    """POST /food-log/submit with one rice item unless told otherwise."""
+    payload = {"meal_type": "breakfast", "log_method": "text", "items": items or [RICE], **extra}
+    return client.post("/food-log/submit", json=payload, headers=headers)

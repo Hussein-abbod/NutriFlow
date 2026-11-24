@@ -17,10 +17,20 @@ def _password_fits_bcrypt(value: str) -> str:
     return value
 
 
+def _password_is_strong(value: str) -> str:
+    """Strength rules (mirrored by frontend/src/features/auth/schemas/fieldRules.ts)."""
+    if not any(char.isalpha() for char in value) or not any(char.isdigit() for char in value):
+        raise ValueError("Password must contain at least one letter and one number.")
+    if value.strip() != value:
+        raise ValueError("Password cannot start or end with a space.")
+    return value
+
+
 NewPassword = Annotated[
     str,
     Field(min_length=PASSWORD_MIN_LENGTH, max_length=PASSWORD_MAX_LENGTH),
     AfterValidator(_password_fits_bcrypt),
+    AfterValidator(_password_is_strong),
 ]
 
 # Existing passwords are only compared, never stored; a loose upper bound stops abuse.

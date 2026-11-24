@@ -27,28 +27,13 @@ from app.services import auth_service
 from app.utils.security import get_current_user, optional_oauth2_scheme
 from app.utils.token_transport import (
     clear_refresh_cookie,
+    deliver_tokens,
     ensure_trusted_origin,
     get_refresh_cookie,
     is_native_client,
-    set_refresh_cookie,
 )
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
-
-
-def _issue(request: Request, response: Response, tokens: auth_service.TokenPair) -> dict:
-    """Deliver a token pair the way the calling client expects."""
-    body = {
-        "access_token": tokens.access_token,
-        "token_type": "bearer",
-        "expires_in": tokens.expires_in,
-        "refresh_token": None,
-    }
-    if is_native_client(request):
-        body["refresh_token"] = tokens.refresh_token
-    else:
-        set_refresh_cookie(response, tokens.refresh_token)
-    return body
 
 
 def _presented_refresh_token(
@@ -78,7 +63,7 @@ def register(
 ):
     """Register with email + password (+ optional full name) and log the user in."""
     user = auth_service.create_user(db, user_data)
-    tokens = _issue(request, response, auth_service.generate_tokens(user.id))
+    tokens = deliver_tokens(request, response, auth_service.generate_tokens(user))
     return RegisterResponse(
         id=user.id,
         email=user.email,
@@ -98,7 +83,7 @@ def login(
 ):
     """Authenticate and return an access token (+ refresh token via cookie or body)."""
     user = auth_service.authenticate_user(db, credentials.email, credentials.password)
-    return _issue(request, response, auth_service.generate_tokens(user.id))
+    return deliver_tokens(request, response, auth_service.generate_tokens(user))
 
 
 @router.post("/refresh", response_model=TokenResponse, summary="Refresh access token")
@@ -112,7 +97,7 @@ def refresh(
     """Exchange a valid refresh token for a new pair. The old refresh token is revoked."""
     refresh_token = _presented_refresh_token(request, body)
     tokens = auth_service.refresh_tokens(db, refresh_token)
-    return _issue(request, response, tokens)
+    return deliver_tokens(request, response, tokens)
 
 
 @router.post(

@@ -58,7 +58,7 @@ def generate_meal_advice(
             HumanMessage(content=user_prompt),
         ])
         return response.content.strip()
-    except Exception as e:
+    except Exception:
         return (
             f"You logged {meal_type} with {round(calories)} kcal. "
             f"You have {round(remaining_calories)} kcal remaining today. "

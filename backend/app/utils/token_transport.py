@@ -48,6 +48,24 @@ def clear_refresh_cookie(response: Response) -> None:
     )
 
 
+def deliver_tokens(request: Request, response: Response, tokens) -> dict:
+    """
+    Token-response body for a new token pair (`auth_service.TokenPair`), delivered the way
+    the calling client expects: web gets the refresh token as a cookie, native in the body.
+    """
+    body = {
+        "access_token": tokens.access_token,
+        "token_type": "bearer",
+        "expires_in": tokens.expires_in,
+        "refresh_token": None,
+    }
+    if is_native_client(request):
+        body["refresh_token"] = tokens.refresh_token
+    else:
+        set_refresh_cookie(response, tokens.refresh_token)
+    return body
+
+
 def get_refresh_cookie(request: Request) -> Optional[str]:
     return request.cookies.get(settings.REFRESH_COOKIE_NAME)
 

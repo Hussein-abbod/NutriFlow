@@ -18,6 +18,7 @@ from app.utils.security import (
     decode_token,
     hash_password,
     revoke_token,
+    user_for_token,
     verify_password,
 )
 
@@ -62,9 +63,9 @@ def authenticate_user(db: Session, email: str, password: str) -> User:
     return user
 
 
-def generate_tokens(user_id: int) -> TokenPair:
-    """Generate an access + refresh token pair for a user id."""
-    token_data = {"sub": str(user_id)}
+def generate_tokens(user: User) -> TokenPair:
+    """Generate an access + refresh token pair for a user (stamped with its token version)."""
+    token_data = {"sub": str(user.id), "ver": user.token_version}
     return TokenPair(
         access_token=create_access_token(token_data),
         refresh_token=create_refresh_token(token_data),
@@ -75,22 +76,17 @@ def generate_tokens(user_id: int) -> TokenPair:
 def refresh_tokens(db: Session, refresh_token: Optional[str]) -> TokenPair:
     """
     Validate a refresh token and issue a new pair (rotation: the old one is revoked).
-    Raises 401 when the token is missing, invalid, revoked, or the user no longer exists.
+    Raises 401 when the token is missing, invalid, revoked, older than the user's last
+    password change, or the user no longer exists.
     """
     if not refresh_token:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Refresh token missing.",
         )
-    payload = decode_token(refresh_token, expected_type="refresh")
-    user = db.query(User).filter(User.id == int(payload["sub"])).first()
-    if user is None:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="User not found",
-        )
+    user = user_for_token(db, decode_token(refresh_token, expected_type="refresh"))
     revoke_token(refresh_token)
-    return generate_tokens(user.id)
+    return generate_tokens(user)
 
 
 def logout(access_token: Optional[str], refresh_token: Optional[str]) -> None:

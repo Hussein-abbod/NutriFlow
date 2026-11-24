@@ -2,7 +2,7 @@
 Users router for NutriFlow: profile, password and allergies of the current user.
 """
 
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, Request, Response
 from sqlalchemy.orm import Session
 
 from app.database import get_db
@@ -11,13 +11,14 @@ from app.models.user import User
 from app.schemas.user import (
     AllergiesOut,
     AllergiesRequest,
-    MessageOut,
+    PasswordChangeOut,
     PasswordChangeRequest,
     ProfileUpdateRequest,
     UserOut,
 )
 from app.services import user_service
 from app.utils.security import get_current_user
+from app.utils.token_transport import deliver_tokens
 
 router = APIRouter(prefix="/users", tags=["Users"])
 
@@ -38,16 +39,18 @@ def update_profile(
     return user_service.update_profile(db, current_user, data)
 
 
-@router.put("/password", response_model=MessageOut, summary="Change password")
+@router.put("/password", response_model=PasswordChangeOut, summary="Change password")
 @limiter.limit("5/minute")
 def change_password(
     request: Request,
+    response: Response,
     data: PasswordChangeRequest,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    user_service.change_password(db, current_user, data)
-    return MessageOut(message="Password changed successfully")
+    """Change the password; other sessions end and this device gets new tokens."""
+    tokens = user_service.change_password(db, current_user, data)
+    return {"message": "Password changed successfully", **deliver_tokens(request, response, tokens)}
 
 
 @router.put("/allergies", response_model=AllergiesOut, summary="Update food allergies")

@@ -1,119 +1,43 @@
-"""
-Coach AI router for NutriFlow.
-"""
+"""Coach AI router for NutriFlow (HTTP only; logic in services/coach_service.py)."""
 
-from typing import List, Optional
-from pydantic import BaseModel, Field
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, Query, Request, status
 from sqlalchemy.orm import Session
-from datetime import datetime
 
 from app.database import get_db
 from app.limiter import AI_RATE_LIMIT, limiter
 from app.models.user import User
-from app.models.coach_message import CoachMessage, MessageRole
+from app.schemas.coach import HISTORY_DEFAULT_LIMIT, HISTORY_MAX_LIMIT, CoachMessageOut, CoachMessageRequest
+from app.services import coach_service
 from app.utils.security import get_current_user
-from app.services.coach_agent import generate_coach_response
 
 router = APIRouter(prefix="/coach", tags=["Coach AI"])
 
-class MessageRequest(BaseModel):
-    message: str = Field(..., min_length=1, max_length=2000)
-    is_initial_context: bool = Field(False, description="True if this is the automated opening message from meal advice")
-    advice_content: Optional[str] = Field(None, max_length=5000, description="The advice text if is_initial_context is True")
 
-class MessageOut(BaseModel):
-    id: int
-    role: str
-    content: str
-    created_at: datetime
-    
-    model_config = {"from_attributes": True}
-
-@router.post("/message", response_model=MessageOut)
+@router.post("/message", response_model=CoachMessageOut, summary="Ask the Coach AI")
 @limiter.limit(AI_RATE_LIMIT)
-def send_message(
+async def send_message(
     request: Request,
-    data: MessageRequest,
+    data: CoachMessageRequest,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """Send a message to the Coach AI and get a response."""
-    
-    if data.is_initial_context and data.advice_content:
-        # Save the advice as an AI message first so it appears in chat
-        advice_msg = CoachMessage(
-            user_id=current_user.id,
-            role=MessageRole.ASSISTANT,
-            content=data.advice_content
-        )
-        db.add(advice_msg)
-        
-        # We don't save the system prompt sent to the LLM in the DB for the user to see,
-        # we just pass it to the agent to build context in memory
-        agent_response = generate_coach_response(db, current_user, data.message)
-        
-        # Save the agent's acknowledgment
-        reply_msg = CoachMessage(
-            user_id=current_user.id,
-            role=MessageRole.ASSISTANT,
-            content=agent_response
-        )
-        db.add(reply_msg)
-        db.commit()
-        db.refresh(reply_msg)
-        return reply_msg
+    """Send a message (or open a chat about a meal's advice) and get the coach's reply."""
+    return await coach_service.send_message(db, current_user, data)
 
-    else:
-        # Normal chat flow
-        user_msg = CoachMessage(
-            user_id=current_user.id,
-            role=MessageRole.USER,
-            content=data.message
-        )
-        db.add(user_msg)
-        db.commit() # Commit to get ID
-        
-        # Generate response
-        agent_response = generate_coach_response(db, current_user, data.message)
-        
-        reply_msg = CoachMessage(
-            user_id=current_user.id,
-            role=MessageRole.ASSISTANT,
-            content=agent_response
-        )
-        db.add(reply_msg)
-        db.commit()
-        db.refresh(reply_msg)
-        
-        return reply_msg
 
-@router.get("/history", response_model=List[MessageOut])
+@router.get("/history", response_model=list[CoachMessageOut], summary="Recent chat history")
 def get_history(
-    limit: int = 20,
+    limit: int = Query(HISTORY_DEFAULT_LIMIT, ge=1, le=HISTORY_MAX_LIMIT),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """Get recent chat history."""
-    messages = db.query(CoachMessage).filter(
-        CoachMessage.user_id == current_user.id
-    ).order_by(CoachMessage.created_at.desc()).limit(limit).all()
-    
-    # Return in chronological order
-    return list(reversed(messages))
+    """The user's last `limit` messages, oldest first."""
+    return coach_service.recent_messages(db, current_user, limit)
 
-@router.delete("/history", status_code=204)
+
+@router.delete("/history", status_code=status.HTTP_204_NO_CONTENT, summary="Clear chat history")
 def clear_history(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """Clear all chat history for the current user."""
-    from app.services.coach_agent import clear_user_memory
-    
-    # 1. Clear LLM memory
-    clear_user_memory(current_user.id)
-    
-    # 2. Delete from database
-    db.query(CoachMessage).filter(CoachMessage.user_id == current_user.id).delete()
-    db.commit()
-    return None
+    coach_service.clear_history(db, current_user)

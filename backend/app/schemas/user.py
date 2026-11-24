@@ -4,7 +4,7 @@ from datetime import datetime
 from enum import Enum
 from typing import List, Optional
 
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, model_validator
 
 from app.schemas.common import (
     Age,
@@ -58,6 +58,12 @@ class ProfileUpdateRequest(BaseModel):
 class PasswordChangeRequest(BaseModel):
     current_password: ExistingPassword
     new_password: NewPassword
+
+    @model_validator(mode="after")
+    def _new_password_differs(self) -> "PasswordChangeRequest":
+        if self.new_password == self.current_password:
+            raise ValueError("New password must be different from the current one.")
+        return self
 
 
 class AllergiesRequest(BaseModel):
@@ -122,4 +128,12 @@ class AllergiesOut(BaseModel):
 
 
 class MessageOut(BaseModel):
+    message: str
+
+
+class PasswordChangeOut(TokenResponse):
+    """
+    A password change ends every other session; this device gets a fresh token pair
+    (web: refresh cookie, native: body) so it stays signed in.
+    """
     message: str
