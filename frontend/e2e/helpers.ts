@@ -23,10 +23,11 @@ export async function logIn(page: Page, email: string, password = PASSWORD) {
 
 /**
  * Sign up and finish onboarding with fixed answers: female, 30 y, 165 cm, 70 kg, moderately
- * active, lose 5 kg in 10 weeks → 1651 kcal a day. Ends on the Food Log tab.
+ * active, lose 5 kg in 10 weeks → 1651 kcal a day. Ends on the Food Log tab; returns the email.
  */
-export async function signUpAndOnboard(page: Page, name = 'E2E User') {
-  await signUp(page, { name, email: uniqueEmail() });
+export async function signUpAndOnboard(page: Page, name = 'E2E User'): Promise<string> {
+  const email = uniqueEmail();
+  await signUp(page, { name, email });
   const next = () => page.getByRole('button', { name: 'Next' }).click();
 
   await expect(page.getByRole('heading', { name: 'Basic Information' })).toBeVisible();
@@ -52,4 +53,5 @@ export async function signUpAndOnboard(page: Page, name = 'E2E User') {
   await expect(page.getByRole('heading', { name: 'Your Plan is Ready!' })).toBeVisible();
   await page.getByRole('button', { name: 'Confirm & Finish' }).click();
   await expect(page).toHaveURL(/\/food-log$/);
+  return email;
 }

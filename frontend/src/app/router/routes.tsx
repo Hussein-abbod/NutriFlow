@@ -2,6 +2,7 @@ import { Navigate, type RouteObject } from 'react-router';
 import { LoginPage, paths, RegisterPage } from '@/features/auth';
 import { FoodLogPage, foodLogPaths } from '@/features/food-log';
 import { AppShell } from '../layout/AppShell';
+import { RouteErrorScreen } from '../layout/RouteErrorScreen';
 import { RootLayout } from './RootLayout';
 import { RootRedirect } from './RootRedirect';
 import { RouteGate } from './RouteGate';
@@ -17,6 +18,7 @@ export function createAppRoutes({ splashMinDurationMs }: AppRouteOptions = {}): 
   return [
     {
       element: <RootLayout splashMinDurationMs={splashMinDurationMs} />,
+      errorElement: <RouteErrorScreen />,
       children: [
         { index: true, element: <RootRedirect /> },
         {

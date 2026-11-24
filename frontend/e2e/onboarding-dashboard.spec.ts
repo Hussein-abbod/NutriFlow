@@ -73,7 +73,7 @@ test('register → complete onboarding → dashboard shows the calculated target
   await page.reload();
   await expect(page.getByRole('heading', { name: "Today's Overview" })).toBeVisible();
   await page.getByRole('link', { name: 'Profile' }).click();
-  await page.getByRole('button', { name: 'Log out' }).click();
+  await page.getByRole('button', { name: 'Logout' }).click();
   await expect(page).toHaveURL(/\/login$/);
   await logIn(page, email);
   await expect(page).toHaveURL(/\/food-log$/);
