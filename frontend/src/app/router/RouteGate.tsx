@@ -9,7 +9,8 @@ import { useSessionUser } from './useSessionUser';
  */
 export function RouteGate({ audience }: { audience: RouteAudience }) {
   const { status, user, isLoadingUser, userError, retry } = useSessionUser();
-  if (status === 'unknown') return null;
+  // RootLayout shows the splash / offline screen for these.
+  if (status === 'unknown' || status === 'unreachable') return null;
   if (userError) return <FullScreenStatus error={userError} onRetry={retry} />;
   if (isLoadingUser) return <FullScreenStatus />;
 

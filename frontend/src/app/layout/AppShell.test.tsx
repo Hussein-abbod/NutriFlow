@@ -9,8 +9,14 @@ import { foodLogHandlers } from '@/test/foodLogHandlers';
 import { renderApp } from '@/test/renderApp';
 import { server } from '@/test/server';
 
-// The dashboard route is lazy-loaded; import it once up front so the first test is not slow.
-beforeAll(() => import('@/features/dashboard'));
+// Tabs are lazy-loaded; import them once up front so the first test is not slow.
+beforeAll(() =>
+  Promise.all([
+    import('@/features/dashboard'),
+    import('@/features/coach'),
+    import('@/features/profile'),
+  ]),
+);
 
 describe('AppShell bottom navigation', () => {
   it('has the four Flutter tabs and starts on Food Log', async () => {
@@ -42,7 +48,7 @@ describe('AppShell bottom navigation', () => {
     const { router } = renderApp('/food-log');
 
     await user.click(await screen.findByRole('link', { name: 'AI Coach' }));
-    expect(router.state.location.pathname).toBe('/coach');
+    await waitFor(() => expect(router.state.location.pathname).toBe('/coach'));
     expect(await screen.findByRole('heading', { name: 'Coach AI' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'AI Coach' })).toHaveAttribute('aria-current', 'page');
     expect(screen.getByRole('link', { name: 'Food Log' })).not.toHaveAttribute('aria-current');

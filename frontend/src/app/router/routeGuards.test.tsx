@@ -1,7 +1,7 @@
 import { act, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { http, HttpResponse } from 'msw';
-import { describe, expect, it } from 'vitest';
+import { beforeAll, describe, expect, it } from 'vitest';
 import { tokenStore } from '@/lib/api';
 import { sessionHandlers } from '@/test/authHandlers';
 import { coachServer } from '@/test/coachHandlers';
@@ -11,6 +11,15 @@ import { renderApp } from '@/test/renderApp';
 import { server } from '@/test/server';
 
 const onboardedUser = buildUser({ is_profile_complete: true });
+
+// Lazy routes the guards lead to; load them once up front.
+beforeAll(() =>
+  Promise.all([
+    import('@/features/coach'),
+    import('@/features/profile'),
+    import('@/features/onboarding'),
+  ]),
+);
 
 describe('splash + route guards', () => {
   it('shows the splash while restoring the session', async () => {

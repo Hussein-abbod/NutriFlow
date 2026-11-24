@@ -11,8 +11,8 @@ import { server } from '@/test/server';
 import { addDays, toIsoDay } from '../model/dates';
 import { useAdviceStore } from '../store/adviceStore';
 
-// The add-food screens are lazy routes; load them once up front.
-beforeAll(() => import('../addFoodScreens'));
+// The add-food screens and the coach tab are lazy routes; load them once up front.
+beforeAll(() => Promise.all([import('../addFoodScreens'), import('@/features/coach')]));
 
 const user = buildUser({
   full_name: 'Dana Flow',
@@ -231,7 +231,7 @@ describe('FoodLogPage', () => {
     const { router } = renderFoodLog();
 
     await userEvents.click(await screen.findByRole('button', { name: 'Discuss with Coach AI' }));
-    expect(router.state.location.pathname).toBe('/coach');
+    await waitFor(() => expect(router.state.location.pathname).toBe('/coach'));
     const conversation = await screen.findByRole('list', { name: 'Conversation with Coach AI' });
     expect(conversation).toHaveTextContent('Great start! Add some protein at lunch.');
     expect(await within(conversation).findByText('Happy to talk about this meal.')).toBeVisible();

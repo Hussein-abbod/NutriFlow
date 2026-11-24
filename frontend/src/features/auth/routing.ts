@@ -1,5 +1,4 @@
 import type { UserDto } from '@/types/api';
-import type { SessionStatus } from './types';
 
 export const paths = {
   root: '/',
@@ -24,7 +23,7 @@ export function homePathFor(user: Pick<UserDto, 'is_profile_complete'>): string 
  */
 export function resolveRedirect(
   audience: RouteAudience,
-  status: Exclude<SessionStatus, 'unknown'>,
+  status: 'authenticated' | 'anonymous',
   user: Pick<UserDto, 'is_profile_complete'> | undefined,
 ): string | null {
   if (status === 'anonymous') {

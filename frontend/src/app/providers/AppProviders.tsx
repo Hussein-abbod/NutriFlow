@@ -2,6 +2,7 @@ import { QueryClientProvider, type QueryClient } from '@tanstack/react-query';
 import type { ReactNode } from 'react';
 import { SnackbarHost } from '@/components';
 import { useSessionExpiryHandler } from '@/features/auth';
+import { UpdateToast } from '../layout/UpdateToast';
 
 function SessionExpiryListener() {
   useSessionExpiryHandler();
@@ -19,6 +20,7 @@ export function AppProviders({
     <QueryClientProvider client={queryClient}>
       <SessionExpiryListener />
       {children}
+      <UpdateToast />
       <SnackbarHost />
     </QueryClientProvider>
   );

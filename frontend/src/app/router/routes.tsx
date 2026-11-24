@@ -1,9 +1,6 @@
 import { Navigate, type RouteObject } from 'react-router';
 import { LoginPage, paths, RegisterPage } from '@/features/auth';
-import { CoachPage } from '@/features/coach';
 import { FoodLogPage, foodLogPaths } from '@/features/food-log';
-import { OnboardingPage } from '@/features/onboarding';
-import { ProfilePage } from '@/features/profile';
 import { AppShell } from '../layout/AppShell';
 import { RootLayout } from './RootLayout';
 import { RootRedirect } from './RootRedirect';
@@ -31,7 +28,14 @@ export function createAppRoutes({ splashMinDurationMs }: AppRouteOptions = {}): 
         },
         {
           element: <RouteGate audience="onboarding" />,
-          children: [{ path: paths.onboarding, element: <OnboardingPage /> }],
+          children: [
+            {
+              path: paths.onboarding,
+              lazy: async () => ({
+                Component: (await import('@/features/onboarding')).OnboardingPage,
+              }),
+            },
+          ],
         },
         {
           element: <RouteGate audience="app" />,
@@ -48,8 +52,16 @@ export function createAppRoutes({ splashMinDurationMs }: AppRouteOptions = {}): 
                     Component: (await import('@/features/dashboard')).DashboardPage,
                   }),
                 },
-                { path: tabPaths.coach, element: <CoachPage /> },
-                { path: tabPaths.profile, element: <ProfilePage /> },
+                {
+                  path: tabPaths.coach,
+                  lazy: async () => ({ Component: (await import('@/features/coach')).CoachPage }),
+                },
+                {
+                  path: tabPaths.profile,
+                  lazy: async () => ({
+                    Component: (await import('@/features/profile')).ProfilePage,
+                  }),
+                },
               ],
             },
             // Screens Flutter pushes over the tabs (full screen, no bottom nav), lazy-loaded.

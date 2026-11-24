@@ -8,12 +8,18 @@ export default defineConfig({
   plugins: [
     react(),
     VitePWA({
-      registerType: 'autoUpdate',
-      includeAssets: ['favicon.png', 'icons/apple-touch-icon.png'],
+      // An update waits until the user taps "Reload" in the update toast (UpdateToast).
+      registerType: 'prompt',
+      injectRegister: false,
+      includeAssets: ['favicon.png', 'icons/apple-touch-icon.png', 'sw-notifications.js'],
       manifest: {
+        id: '/',
         name: 'NutriFlow',
         short_name: 'NutriFlow',
-        description: 'Smart Nutrition Tracking',
+        description: 'Smart nutrition tracking with an AI coach',
+        lang: 'en',
+        categories: ['health', 'food', 'lifestyle'],
+        // --brand-on-primary-container / --color-background (tokens.css)
         theme_color: '#005E2D',
         background_color: '#F8F9FF',
         display: 'standalone',
@@ -21,25 +27,57 @@ export default defineConfig({
         start_url: '/',
         scope: '/',
         icons: [
-          { src: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
-          { src: '/icons/icon-512.png', sizes: '512x512', type: 'image/png' },
-          {
-            src: '/icons/icon-maskable-512.png',
-            sizes: '512x512',
+          ...[48, 72, 96, 128, 144, 152, 192, 256, 384, 512].map((size) => ({
+            src: `/icons/icon-${size}.png`,
+            sizes: `${size}x${size}`,
+            type: 'image/png',
+            purpose: 'any',
+          })),
+          ...[192, 512].map((size) => ({
+            src: `/icons/icon-maskable-${size}.png`,
+            sizes: `${size}x${size}`,
             type: 'image/png',
             purpose: 'maskable',
+          })),
+        ],
+        shortcuts: [
+          {
+            name: 'Food Log',
+            url: '/food-log',
+            icons: [{ src: '/icons/icon-96.png', sizes: '96x96', type: 'image/png' }],
+          },
+          {
+            name: 'Coach AI',
+            url: '/coach',
+            icons: [{ src: '/icons/icon-96.png', sizes: '96x96', type: 'image/png' }],
           },
         ],
       },
       workbox: {
-        // App shell only; API responses are never cached by the service worker.
-        globPatterns: ['**/*.{js,css,html,png,svg,woff2}'],
+        // Offline app shell only: API responses are never cached by the service worker.
+        globPatterns: ['**/*.{js,css,html,woff2}', 'assets/*.{png,svg}', 'favicon.png'],
+        // Latin only: other Inter subsets load on demand (and fall back offline).
+        globIgnores: ['**/inter-{cyrillic,cyrillic-ext,greek,greek-ext,vietnamese}-*.woff2'],
         navigateFallback: '/index.html',
+        importScripts: ['sw-notifications.js'],
+        cleanupOutdatedCaches: true,
       },
     }),
   ],
   resolve: {
     alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) },
+  },
+  build: {
+    rollupOptions: {
+      output: {
+        // Libraries change less often than the app: separate chunks stay cached after updates.
+        manualChunks: {
+          react: ['react', 'react-dom', 'react-router'],
+          data: ['@tanstack/react-query', 'zustand'],
+          forms: ['react-hook-form', '@hookform/resolvers', 'zod'],
+        },
+      },
+    },
   },
   server: { port: 5173, strictPort: true },
   preview: { port: 4173, strictPort: true },

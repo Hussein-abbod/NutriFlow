@@ -1,12 +1,14 @@
 import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { http, HttpResponse } from 'msw';
-import { describe, expect, it } from 'vitest';
+import { beforeAll, describe, expect, it, vi } from 'vitest';
 import { buildUser, TEST_API } from '@/test/fixtures';
 import { profileServer } from '@/test/profileHandlers';
 import { renderApp } from '@/test/renderApp';
 import { server } from '@/test/server';
 import { tokenStore } from '@/lib/api';
+import { usePwaStore } from '@/lib/platform/pwa';
+import type { BeforeInstallPromptEvent } from '@/lib/platform/pwa/pwaStore';
 
 const dana = buildUser({
   full_name: 'Dana Flow',
@@ -26,6 +28,9 @@ function renderProfile(user = dana) {
 
 const card = (name: string) => screen.getByRole('region', { name });
 const field = (name: string) => screen.getByRole('textbox', { name });
+
+// The tab is a lazy route; load it once up front.
+beforeAll(() => import('@/features/profile'));
 
 describe('ProfilePage', () => {
   it('shows the user, their details and allergies', async () => {
@@ -198,6 +203,21 @@ describe('ProfilePage', () => {
     const reminders = await screen.findByRole('switch', { name: 'Meal reminders' });
     expect(reminders).toBeDisabled();
     expect(reminders).toHaveAccessibleDescription(/can't show notifications/);
+  });
+
+  it('offers to install the app when the browser allows it', async () => {
+    const prompt = vi.fn(async () => undefined);
+    usePwaStore.setState({
+      installPrompt: Object.assign(new Event('beforeinstallprompt'), {
+        prompt,
+        userChoice: Promise.resolve({ outcome: 'accepted' as const }),
+      }) as BeforeInstallPromptEvent,
+    });
+    const { userEvents } = renderProfile();
+    await userEvents.click(await screen.findByRole('button', { name: 'Install' }));
+    expect(prompt).toHaveBeenCalledTimes(1);
+    expect(await screen.findByText('NutriFlow was added to your home screen')).toBeVisible();
+    expect(screen.queryByRole('button', { name: 'Install' })).not.toBeInTheDocument();
   });
 
   it('extends the goal by two weeks', async () => {

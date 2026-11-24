@@ -1,7 +1,7 @@
 import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { http, HttpResponse } from 'msw';
-import { describe, expect, it } from 'vitest';
+import { beforeAll, describe, expect, it } from 'vitest';
 import { sessionHandlers } from '@/test/authHandlers';
 import { buildCoachMessage, coachServer, type CoachServerOptions } from '@/test/coachHandlers';
 import { buildUser, TEST_API } from '@/test/fixtures';
@@ -24,6 +24,9 @@ function renderCoach(
 const conversation = () => screen.findByRole('list', { name: 'Conversation with Coach AI' });
 const input = () => screen.getByRole('textbox', { name: 'Message Coach AI' });
 const sendButton = () => screen.getByRole('button', { name: 'Send message' });
+
+// The tab is a lazy route; load it once up front.
+beforeAll(() => import('@/features/coach'));
 
 describe('CoachPage', () => {
   it('greets with suggestions while the chat is empty', async () => {

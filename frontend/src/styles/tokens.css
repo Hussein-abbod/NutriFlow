@@ -60,6 +60,7 @@
   --color-divider: #d9e3f6;
   --color-snackbar: #121c2a;
   --color-on-snackbar: #ffffff;
+  --color-snackbar-action: #4ade80; /* inversePrimary on the dark snackbar */
   --color-nav: #ffffff;
   --color-nav-selected: #006d36;
   --color-nav-unselected: #6b7280;
@@ -271,6 +272,7 @@
   --color-divider: rgb(255 255 255 / 0.08);
   --color-snackbar: #2a2a3c;
   --color-on-snackbar: #e8e8f0;
+  --color-snackbar-action: #4de082;
   --color-nav: #1e1e2e;
   --color-nav-selected: #4de082;
   --color-nav-unselected: #9ca3af;

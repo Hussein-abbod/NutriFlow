@@ -1,0 +1,57 @@
+/* A floating snackbar with actions, above the bottom navigation */
+.region {
+  position: fixed;
+  right: 0;
+  bottom: calc(var(--bottom-nav-height, var(--safe-bottom)) + var(--space-3));
+  left: 0;
+  z-index: 190;
+  display: flex;
+  justify-content: center;
+  padding: 0 var(--space-4);
+  pointer-events: none;
+}
+
+.toast {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1);
+  width: 100%;
+  max-width: 560px;
+  padding: var(--space-2) var(--space-2) var(--space-2) var(--space-4);
+  border-radius: var(--radius-snackbar);
+  background: var(--color-snackbar);
+  color: var(--color-on-snackbar);
+  box-shadow: 0 3px 8px rgb(0 0 0 / 0.2);
+  pointer-events: auto;
+  animation: toast-in var(--duration-normal) var(--ease-smooth-decelerate) both;
+}
+
+.message {
+  flex: 1 1 12rem;
+  padding: var(--space-2) 0;
+  font: 400 14px/1.43 var(--font-family);
+}
+
+/* SnackBarAction: inverse primary on the dark snackbar */
+.action {
+  min-height: 44px;
+  padding: 0 var(--space-3);
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--color-snackbar-action);
+  font: var(--font-label-lg);
+  cursor: pointer;
+}
+
+.action:hover {
+  background: color-mix(in srgb, var(--color-snackbar-action) 12%, transparent);
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+}
