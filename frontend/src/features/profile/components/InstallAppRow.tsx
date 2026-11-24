@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { Button, Icon, showSnackbar } from '@/components';
+import { Button, showSnackbar } from '@/components';
 import { needsManualInstall, promptInstall, usePwaStore } from '@/lib/platform/pwa';
-import styles from './InstallAppRow.module.css';
+import { SettingRow } from './SettingRow';
 
 /**
  * Install NutriFlow on the home screen: the browser's own dialog where it offers one
@@ -17,23 +17,20 @@ export function InstallAppRow() {
   };
 
   return (
-    <div className={styles.row}>
-      <span className={styles.icon} aria-hidden="true">
-        <Icon name="fileDownload" size={20} />
-      </span>
-      <div className={styles.text}>
-        <p className={styles.label}>Install the app</p>
-        <p className={styles.description}>
-          {canPrompt
-            ? 'Open NutriFlow from your home screen, full screen and faster.'
-            : 'In Safari, tap Share, then “Add to Home Screen”.'}
-        </p>
-      </div>
+    <SettingRow
+      icon="fileDownload"
+      label="Install the app"
+      description={
+        canPrompt
+          ? 'Open NutriFlow from your home screen, full screen and faster.'
+          : 'In Safari, tap Share, then “Add to Home Screen”.'
+      }
+    >
       {canPrompt && (
         <Button variant="outlined" onClick={() => void install()}>
           Install
         </Button>
       )}
-    </div>
+    </SettingRow>
   );
 }

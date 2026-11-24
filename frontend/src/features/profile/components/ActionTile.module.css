@@ -26,8 +26,8 @@
 }
 
 .destructive {
-  --tile-color: var(--color-over-target);
-  color: var(--color-over-target);
+  --tile-color: var(--color-destructive-text);
+  color: var(--color-destructive-text);
 }
 
 .badge {

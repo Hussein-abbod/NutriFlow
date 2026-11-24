@@ -1,6 +1,7 @@
 import { useId } from 'react';
 import { showSnackbar } from '@/components';
 import { reminderTimesLabel, useReminderSettings, type ReminderStatus } from '@/lib/notifications';
+import { SettingRow } from './SettingRow';
 import styles from './ReminderSwitch.module.css';
 
 function description(status: ReminderStatus): string {
@@ -33,15 +34,12 @@ export function ReminderSwitch() {
   };
 
   return (
-    <div className={styles.row}>
-      <div className={styles.text}>
-        <p id={labelId} className={styles.label}>
-          Meal reminders
-        </p>
-        <p id={descriptionId} className={styles.description}>
-          {description(status)}
-        </p>
-      </div>
+    <SettingRow
+      label="Meal reminders"
+      description={description(status)}
+      labelId={labelId}
+      descriptionId={descriptionId}
+    >
       <button
         type="button"
         role="switch"
@@ -54,6 +52,6 @@ export function ReminderSwitch() {
       >
         <span className={styles.thumb} aria-hidden="true" />
       </button>
-    </div>
+    </SettingRow>
   );
 }

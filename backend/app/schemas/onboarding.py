@@ -1,25 +1,11 @@
 """Pydantic schemas for Onboarding endpoints."""
 
-from enum import Enum
 from typing import Optional
 
 from pydantic import BaseModel, Field
 
 from app.schemas.common import Age, AllergyList, FullName, HeightCm, WeightKg
-
-
-class ActivityLevel(str, Enum):
-    SEDENTARY = "sedentary"
-    LIGHTLY_ACTIVE = "lightly_active"
-    MODERATELY_ACTIVE = "moderately_active"
-    VERY_ACTIVE = "very_active"
-    EXTRA_ACTIVE = "extra_active"
-
-
-class GoalType(str, Enum):
-    GAIN_WEIGHT = "gain_weight"
-    LOSE_WEIGHT = "lose_weight"
-    MAINTAIN_WEIGHT = "maintain_weight"
+from app.schemas.user import ActivityLevel, GoalType
 
 
 # ---------- Request schemas ----------

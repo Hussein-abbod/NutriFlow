@@ -140,6 +140,8 @@
   --color-profile-field: #f5f7fa;
   --color-allergy-chip: color-mix(in srgb, var(--brand-coral) 10%, transparent);
   --color-allergy-text: var(--brand-coral);
+  /* Text of destructive actions (Reset Goal, Logout) */
+  --color-destructive-text: var(--brand-coral);
 
   /* ── Typography (Inter, Material 3 scale from _textTheme) ── */
   --font-family: 'Inter Variable', Inter, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
@@ -309,4 +311,6 @@
   /* #BA1A1A on the dark card fails contrast; the dark error red keeps the meaning */
   --color-allergy-chip: rgb(255 82 82 / 0.12);
   --color-allergy-text: #ff8a80;
+  /* #FF5252 on the dark card is below 4.5:1 */
+  --color-destructive-text: #ff8a80;
 }
