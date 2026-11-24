@@ -3,7 +3,7 @@
 > Every AI session: read [AGENTS.md](AGENTS.md) first, then this file.
 > At the end of the session, update this file so the next session can continue.
 
-_Last updated: 2026-11-24 — session 3 mostly done (review fixes pending, see "Next step")._
+_Last updated: 2026-11-24 — session 4 done: **migration complete**. Next: Capacitor (see "Next step")._
 
 ---
 
@@ -21,8 +21,8 @@ _Last updated: 2026-11-24 — session 3 mostly done (review fixes pending, see "
 | --- | --- | --- |
 | 1 | Foundation: backend tests + security fixes, frontend setup, design system, API client, auth (splash, login, register) | ✅ Done |
 | 2 | Onboarding (6 steps), app shell with bottom tabs, dashboard tab | ✅ Done |
-| 3 | Food logging: text / barcode / image, confirm, edit, AI advice, history, delete | 🟨 Built + tested; 4 review fixes + security review left |
-| 4 | Coach AI, profile, notifications, PWA, full E2E, README, final review | ⬜ Not started |
+| 3 | Food logging: text / barcode / image, confirm, edit, AI advice, history, delete | ✅ Done |
+| 4 | Coach AI, profile, notifications, PWA, full E2E, README, final review | ✅ Done |
 
 Status legend: ⬜ not started · 🟨 in progress · ✅ done
 
@@ -42,15 +42,13 @@ Status legend: ⬜ not started · 🟨 in progress · ✅ done
 | `screens/food_log/food_confirm_screen.dart` | `features/food-log/pages/FoodConfirmPage.tsx` | ✅ |
 | `widgets/edit_food_item_sheet.dart` | `features/food-log/components/confirm/EditFoodItemSheet.tsx` | ✅ |
 | `widgets/ai_advice_sheet.dart` | `features/food-log/components/AiAdviceSheet.tsx` | ✅ |
-| `screens/tabs/coach_ai_tab.dart` | `features/coach/pages/CoachPage.tsx` | ⬜ |
-| `screens/tabs/profile_tab.dart` | `features/profile/pages/ProfilePage.tsx` | ⬜ |
+| `screens/tabs/coach_ai_tab.dart` + `providers/coach_provider.dart` | `features/coach/pages/CoachPage.tsx`, `components/*`, `api/useCoachChat.ts` | ✅ |
+| `screens/tabs/profile_tab.dart` (549 lines → split) | `features/profile/pages/ProfilePage.tsx` + `components/*` | ✅ |
 | `widgets/glass_card.dart` | `components/GlassCard` | ✅ |
 | `widgets/animated_gradient_ring.dart` | `components/AnimatedGradientRing` | ✅ |
-| `services/notification_service.dart` | `lib/notifications/…` (web, Capacitor later) | ⬜ |
+| `services/notification_service.dart` | `lib/platform/notifications/` (adapter) + `lib/notifications/` (reminders, target alert) | ✅ |
 
-Temporary tab placeholders (`app/placeholders/`): `FoodLogPlaceholderPage` (`/food-log`, replace in
-session 3), `CoachPlaceholderPage` (`/coach`) and `ProfilePlaceholderPage` (`/profile`, has the only
-**Log out** button for now) — replace in session 4. All use `TabPlaceholder` (tab header + "Coming soon").
+All tab placeholders are gone; every Flutter screen has its React counterpart.
 
 ## Frontend overview (`frontend/`)
 
@@ -133,8 +131,10 @@ Base URL in dev: `http://localhost:8000` (docs at `/docs`).
 - **Coach** `/coach`: `POST /message`, `GET /history`, `DELETE /history`
 - **Health**: `GET /`, `GET /health`
 
-Note: the README lists some endpoints with old names (`/food_log/...`, `/coach/chat`,
-`/dashboard/summary`). The list above is the real one; fix the README in session 4.
+Coach: `POST /coach/message` takes `{"message": "..."}` **or** `{"food_log_id": n}` (discuss that meal's
+advice; read from the user's own log, 404 otherwise); `GET /coach/history?limit=1..100` (default 20).
+`PUT /users/password` returns `{message, access_token, token_type, expires_in, refresh_token}` (new pair;
+web gets the refresh cookie). README lists the same endpoints.
 
 ### Auth contract (changed in session 1)
 
@@ -207,20 +207,33 @@ Note: the README lists some endpoints with old names (`/food_log/...`, `/coach/c
 | 2026-11-24 | Dashboard shows Extend / Reset goal only when the goal period has ended (0 days left) | Uses the endpoints now; Flutter only had them in the profile tab (session 4 adds them there too) |
 | 2026-11-24 | No pull-to-refresh on the web dashboard; TanStack Query refetches on focus / after mutations | Browser has no RefreshIndicator equivalent |
 
+| 2026-11-24 | Password change bumps `users.token_version` (JWT claim `ver`); every older token is rejected; the response carries a new pair | Ends other sessions (was a TODO); migration `a4c1d9e2f7b3` |
+| 2026-11-24 | Password rules (both sides): 8–72 chars, ≤ 72 bytes, a letter + a decimal digit, no outer spaces, differs from the current one | Prompt 4 "strength rules" |
+| 2026-11-24 | Coach memory = last 20 stored messages (no in-process LangChain memory); LLM failure → 503, nothing stored | Survives restarts / workers; no fake replies saved |
+| 2026-11-24 | "Discuss with Coach AI" sends `food_log_id`; the chat keeps its history (Flutter cleared it) | Advice can't be forged; no silent data loss |
+| 2026-11-24 | New Chat asks for confirmation (Flutter cleared at once) | Destructive action |
+| 2026-11-24 | Theme: System / Light / Dark in Profile, stored in localStorage; tokens use `html[data-theme]` | Prompt 4; display preference only |
+| 2026-11-24 | Reminders opt-in (Profile switch, or a one-time prompt after the first meal of the day); per device, cleared on logout | Ask at a sensible moment, not on load |
+| 2026-11-24 | Target-reached alert uses the user's own target (Flutter: 2000 kcal), once a day | Correct for every goal |
+| 2026-11-24 | SW in `prompt` mode (update toast), API never cached; session restore that can't reach the server shows an offline screen | Signed-in users were sent to login when offline |
+| 2026-11-24 | Coach, profile, onboarding are lazy routes; vendor chunks split | Main chunk 507 → 87 kB |
+| 2026-11-24 | `targets_service.apply_daily_targets` shared by profile edits and extend-goal (weeks left; whole period after it ended) | Was inconsistent |
+
 ## Known issues / TODO
 
 - **Token revocation is in memory** (`app/utils/security.py`): lost on restart and not shared
   between workers, so a revoked/rotated refresh token works again after a restart. Fix: a
   `revoked_tokens` table (jti + exp, pruned) or Redis — needs a migration.
-- **Password change does not end other sessions** (pre-existing): add a per-user token version /
-  `password_changed_at` claim checked in `decode_token` (migration needed).
-- `user_service._recalculate_targets` (profile edit) spreads the goal over the *whole*
-  `goal_period_weeks` from the current weight, while `extend-goal` uses the weeks left. Align them
-  when the profile tab is built (session 4).
-- `food_log` and `coach` routers still hold business logic and have few tests — move to services +
-  test them in sessions 3–4. Food-log request schemas have no numeric ranges yet.
-- Onboarding has no Log out button (Flutter neither); a user can leave via the URL `/login` only
-  after the session ends. Consider adding one in session 4.
+- Onboarding has no Log out button (Flutter neither).
+- Web reminders only fire while the app is open (no background scheduling on the web; Notification
+  Triggers never shipped). Capacitor Local Notifications will schedule them with the OS.
+- **iOS PWA limits:** notifications only in the installed Home Screen app (iOS 16.4+), never in a
+  Safari tab; no `beforeinstallprompt` (Profile shows "Share → Add to Home Screen"); Safari blocks
+  cross-site cookies, so on iPhone the app and API must be on the same site (see README).
+- `food_log` async routes (session 3) still call the sync SQLAlchemy session on the event loop; the
+  coach route now uses `run_in_threadpool` — do the same in `food_lookup_service` / `food_log_service`.
+- The precache includes the lazy zxing chunk (~460 kB); fine for now, exclude it if install size matters.
+- Old `generated_plugin_registrant.cc` local change in `mobile/` — still not ours, not committed.
 - `mobile/windows/flutter/generated_plugin_registrant.cc` has a local, uncommitted change that was
   already there before session 2 — not ours, left untouched and not committed.
 - passlib 1.7 + bcrypt 4.2 logs a harmless `bcrypt.__about__` traceback at first hash; consider
@@ -249,13 +262,14 @@ cd frontend && npm install && npm run dev        # http://localhost:5173
 ### Checks (all must pass)
 
 ```
-cd backend  && venv\Scripts\python -m pytest          # 244 tests, SQLite, AI/USDA mocked
+cd backend  && venv\Scripts\python -m pytest --cov=app   # 352 tests, 89 % coverage, SQLite, AI/USDA mocked
 cd frontend && npm run lint                            # ESLint (0 warnings) + Prettier
-cd frontend && npm run typecheck && npm test           # tsc -b ; Vitest (343 tests)
+cd frontend && npm run typecheck && npm test           # tsc -b ; Vitest (435 tests)
 cd frontend && npx playwright install chromium         # first time only
 cd frontend && npm run test:e2e                        # Playwright vs REAL backend (needs MySQL);
                                                        # starts tests.e2e_server :8001 + vite :5174
 cd frontend && npm run build                           # production build + service worker
+cd backend  && venv\Scripts\alembic check            # models match migrations (head a4c1d9e2f7b3)
 ```
 
 ## Session 3 summary (food log)
@@ -297,20 +311,37 @@ on #4DE082 ≈ 1.6:1); "Remaining" uses tertiary blue (#448AFF fails 4.5:1); emp
 secondary text (Flutter 50 % fails); "Discuss with Coach AI" navigates to `/coach` with
 `state.coachContext` (coach tab must read it in session 4); bell icon is decorative until notifications.
 
+## Session 4 summary (coach, profile, notifications, PWA)
+
+**Done (all checks green):** backend 352 pytest (89 % coverage), frontend 435 Vitest, ESLint/Prettier/tsc,
+`npm run build`, 7 Playwright E2E vs the real backend (new `e2e/full-journey.spec.ts`: register → onboarding →
+log food → advice → coach → dashboard → edit profile → change password → logout → old password refused →
+login), axe WCAG 2.1 AA at 360px light + dark on food log / coach / profile (+ sheets): 0 real violations.
+`/code-review` and `/security-review` run; review findings fixed with tests.
+
+- **Backend:** `services/coach_service.py`, `schemas/coach.py`, `coach_agent` (context + `generate_reply`);
+  `services/targets_service.py`; `users.token_version` + `user_for_token()` in `utils/security.py`;
+  `token_transport.deliver_tokens()`; `tests/test_coach.py`, `tests/test_route_protection.py` (walks every
+  route: 24 protected routes must answer 401 without / with a refresh / with a garbage token).
+- **Frontend:** `features/coach` (chat, optimistic send, typing indicator, auto-scroll, quick chips, New
+  Chat dialog, `formatCoachText` = `**bold**` only, never HTML, 2000-char zod limit), `features/profile`
+  (personal info edit, allergies sheet via shared `onboarding/hooks/useAllergiesForm`, change password,
+  theme, reminders, install, extend/reset goal via `dashboard/components/ResetGoalSheet`, logout),
+  `lib/theme`, `lib/platform/notifications` (adapter), `lib/notifications`, `lib/platform/pwa`,
+  `app/layout/{OfflineScreen,ConnectionBanner,UpdateToast,RouteErrorScreen}`, `hooks/useOnlineStatus`,
+  `hooks/useHeightVariable` (bottom-nav height → `--bottom-nav-height` for the full-height chat).
+- **PWA:** icons from `mobile/assets/images/logo.png` via `frontend/scripts/generate_icons.py` (Pillow);
+  manifest with all sizes, maskable, shortcuts; `public/sw-notifications.js` (notification click).
+- **Session state:** `SessionStatus` has `unreachable` (refresh got network/429/5xx) → `OfflineScreen`.
+
 ## Next step
 
-1. **Fix the /code-review findings (not done yet):**
-   - `hooks/useBarcodeScan.ts`: after a failed lookup keep `busyRef` true (only Retry/Rescan clears it);
-     now an unknown barcode is re-looked-up every second until 429.
-   - `schemas/foodLogSchemas.ts` `portionSchema`: require quantity ≥ 0.01 (0.004 rounds to 0 → backend 422).
-   - `hooks/useFoodConfirm.ts`: put the onSuccess (set advice + navigate) in `useMutation` options or block
-     Back while submitting (mutate-level callbacks don't run after unmount → meal saved, no feedback).
-   - Clear `useAdviceStore` on logout and session expiry (`features/auth/api/useAuthMutations.ts`).
-   - Nits: strip pydantic "Value error, " prefix in the 422 handler (`backend/app/main.py`); expand UPC-E
-     to UPC-A in `usda_client._barcode_match`; catch only `httpx.HTTPError`/`tenacity.RetryError` in
-     `food_lookup_service._from_usda`; add `max_length=MAX_BASE64_CHARS` to `ImageRequest.image_base64`.
-   Add a test for each, then run all checks (see "How to run").
-2. Run `/security-review` on the session-3 commits and fix findings.
-3. Then **Session 4** (Prompt 4 in `docs/MIGRATION_PROMPTS.md`): coach (read `state.coachContext`),
-   profile (Log out, goal actions), notifications (Flutter notifies when ≥ 2000 kcal after submit), PWA,
-   README. Known: main JS chunk is 507 kB (Vite warns at 500) — consider more lazy routes.
+**Capacitor for Android / iOS** (the migration itself is complete):
+1. `npm i @capacitor/core @capacitor/cli @capacitor/android @capacitor/ios`, `npx cap init`, add platforms.
+2. Native adapters in `src/lib/platform/`: `index.ts` (send `X-Client-Platform: native`, refresh token in
+   secure storage, e.g. `@capacitor/preferences` + encryption or a secure-storage plugin), `barcode/`
+   (`@capacitor-mlkit/barcode-scanning`), `notifications/` (`@capacitor/local-notifications`, real daily
+   schedules), `pwa/` (no service worker in the native shell).
+3. Deploy the API on HTTPS; add `capacitor://localhost` / `https://localhost` to `CORS_ORIGINS`.
+4. Optional: move the food-log routes' DB calls off the event loop (see Known issues); persistent token
+   revocation table (in-memory list is lost on restart).
