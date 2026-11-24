@@ -1,0 +1,23 @@
+/* Header and composer stay put; only the conversation scrolls (Flutter Column + Expanded). */
+.page {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: var(--content-max-width);
+  height: calc(100dvh - var(--bottom-nav-height, 72px));
+  margin: 0 auto;
+}
+
+.conversation {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.status {
+  display: grid;
+  flex: 1;
+  place-items: center;
+  padding: var(--space-6);
+}

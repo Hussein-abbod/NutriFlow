@@ -1,5 +1,7 @@
 import { createApiClient } from './client';
 import { API_BASE_URL, REQUEST_TIMEOUT_MS } from './config';
+
+export { AI_REQUEST_TIMEOUT_MS } from './config';
 import { platform } from '@/lib/platform';
 
 export { ApiError } from './ApiError';

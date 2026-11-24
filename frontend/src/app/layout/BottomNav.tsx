@@ -1,13 +1,15 @@
 import { NavLink } from 'react-router';
 import { Icon } from '@/components';
+import { useHeightVariable } from '@/hooks/useHeightVariable';
 import { cn } from '@/lib/utils/cn';
 import { APP_TABS } from '../router/tabs';
 import styles from './BottomNav.module.css';
 
 /** The custom bottom navigation of home_screen.dart (pill highlight, filled icon when active). */
 export function BottomNav() {
+  const navRef = useHeightVariable<HTMLElement>('--bottom-nav-height');
   return (
-    <nav className={styles.nav} aria-label="Main">
+    <nav ref={navRef} className={styles.nav} aria-label="Main">
       <ul className={styles.list}>
         {APP_TABS.map((tab) => (
           <li key={tab.path} className={styles.cell}>

@@ -40,10 +40,8 @@
   margin-top: var(--space-7);
 }
 
-@media (prefers-color-scheme: dark) {
-  .loginCard {
-    --glass-opacity: 0.1;
-  }
+:global([data-theme='dark']) .loginCard {
+  --glass-opacity: 0.1;
 }
 
 .loginForm,

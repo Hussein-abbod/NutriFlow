@@ -7,3 +7,5 @@ export { SplashPage } from './pages/SplashPage';
 export { homePathFor, paths, resolveRedirect, type RouteAudience } from './routing';
 export { useSessionStore } from './store/sessionStore';
 export type { SessionStatus } from './types';
+export { FULL_NAME_MAX_LENGTH, newPasswordField, PASSWORD_RULES_HINT } from './schemas/fieldRules';
+export { authKeys } from './api/queryKeys';

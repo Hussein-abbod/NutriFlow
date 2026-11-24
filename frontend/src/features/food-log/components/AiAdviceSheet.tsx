@@ -8,7 +8,8 @@ export interface AiAdviceSheetProps {
   log: FoodLogDto | null;
   remainingCalories: number;
   onClose: () => void;
-  onDiscussWithCoach: (advice: string) => void;
+  /** Opens the coach about this meal (`log` is the meal just logged). */
+  onDiscussWithCoach: (log: FoodLogDto) => void;
 }
 
 /** widgets/ai_advice_sheet.dart: the AI's feedback right after a meal is logged. */
@@ -57,7 +58,7 @@ export function AiAdviceSheet({
           fullWidth
           className={styles.coach}
           leadingIcon={<Icon name="chatBubbleOutline" size={18} />}
-          onClick={() => onDiscussWithCoach(advice)}
+          onClick={() => shown && onDiscussWithCoach(shown)}
         >
           Discuss with Coach AI
         </Button>

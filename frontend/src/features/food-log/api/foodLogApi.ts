@@ -1,4 +1,4 @@
-import { apiClient } from '@/lib/api';
+import { AI_REQUEST_TIMEOUT_MS, apiClient } from '@/lib/api';
 import type {
   BarcodeRequestDto,
   DayLogsDto,
@@ -8,9 +8,6 @@ import type {
   ImageRequestDto,
   TextSearchRequestDto,
 } from '@/types/api';
-
-/** Photo recognition and meal advice wait on Gemini / Groq, which can be slow. */
-export const AI_REQUEST_TIMEOUT_MS = 60_000;
 
 /**
  * services/food_log_service.dart. Day logs always use `/history?log_date=` with the

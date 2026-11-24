@@ -1,0 +1,56 @@
+.header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: calc(var(--space-4) + var(--safe-top)) var(--space-6) var(--space-3);
+}
+
+.titles {
+  flex: 1;
+  min-width: 0;
+}
+
+.title {
+  color: var(--color-on-surface);
+  font: 800 22px/1.27 var(--font-family);
+}
+
+.subtitle {
+  color: var(--color-text-secondary);
+  font: var(--font-body-sm);
+}
+
+/* 48px hit area around Flutter's small pill */
+.newChat {
+  display: grid;
+  place-items: center;
+  min-width: var(--tap-target);
+  min-height: var(--tap-target);
+  margin-right: calc(-1 * var(--space-2));
+  padding: 0 var(--space-2);
+  border: 0;
+  border-radius: var(--space-5);
+  background: none;
+  color: var(--color-primary);
+  cursor: pointer;
+}
+
+.newChat:disabled {
+  color: var(--color-text-secondary);
+  cursor: default;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-2) 10px;
+  border-radius: var(--space-5);
+  background: color-mix(in srgb, currentcolor 8%, transparent);
+  font: 600 11px/1.2 var(--font-family);
+  white-space: nowrap;
+}
+
+.newChat:not(:disabled):hover .pill {
+  background: color-mix(in srgb, currentcolor 14%, transparent);
+}

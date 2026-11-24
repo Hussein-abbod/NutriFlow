@@ -12,10 +12,8 @@
   color: var(--brand-coral);
 }
 
-@media (prefers-color-scheme: dark) {
-  .icon {
-    color: var(--color-error);
-  }
+:global([data-theme='dark']) .icon {
+  color: var(--color-error);
 }
 
 .message {

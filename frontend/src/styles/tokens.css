@@ -1,7 +1,8 @@
 /*
  * NutriFlow design tokens.
  * Source of truth: mobile/lib/config/theme.dart + mobile/lib/config/animations.dart.
- * Light theme on :root, dark theme via prefers-color-scheme (Flutter ThemeMode.system).
+ * Light theme on :root, dark theme on [data-theme='dark'], which lib/theme sets from the user's
+ * choice in Profile or, by default, from prefers-color-scheme (Flutter ThemeMode.system).
  */
 
 :root {
@@ -127,6 +128,18 @@
   --color-on-theme-gradient-chip: rgb(255 255 255 / 0.2);
   --color-scanner-background: #000000;
 
+  /* ── Coach (coach_ai_tab.dart) ── */
+  --color-chat-bubble: #f0f2f5;
+  --shadow-chat-bubble: 0 2px 8px rgb(0 0 0 / 0.04);
+  --color-quick-chip: #ffffff;
+  --color-composer-field: #f5f7fa;
+  --shadow-composer: 0 -4px 16px rgb(0 0 0 / 0.04);
+
+  /* ── Profile (profile_tab.dart) ── */
+  --color-profile-field: #f5f7fa;
+  --color-allergy-chip: color-mix(in srgb, var(--brand-coral) 10%, transparent);
+  --color-allergy-text: var(--brand-coral);
+
   /* ── Typography (Inter, Material 3 scale from _textTheme) ── */
   --font-family: 'Inter Variable', Inter, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   --font-display-lg: 700 57px/1.12 var(--font-family);
@@ -222,68 +235,76 @@
   --safe-right: env(safe-area-inset-right, 0px);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    color-scheme: dark;
+:root[data-theme='dark'] {
+  color-scheme: dark;
 
-    --color-primary: #4de082;
-    --color-on-primary: #000000;
-    --color-primary-container: #003300;
-    --color-on-primary-container: #4de082;
-    --color-secondary: #ff8a80;
-    --color-on-secondary: #000000;
-    --color-secondary-container: rgb(255 138 128 / 0.15);
-    --color-on-secondary-container: #ff8a80;
-    --color-tertiary: #adc6ff;
-    --color-on-tertiary: #000000;
-    --color-error: #ff5252;
-    --color-on-error: #000000;
+  --color-primary: #4de082;
+  --color-on-primary: #000000;
+  --color-primary-container: #003300;
+  --color-on-primary-container: #4de082;
+  --color-secondary: #ff8a80;
+  --color-on-secondary: #000000;
+  --color-secondary-container: rgb(255 138 128 / 0.15);
+  --color-on-secondary-container: #ff8a80;
+  --color-tertiary: #adc6ff;
+  --color-on-tertiary: #000000;
+  --color-error: #ff5252;
+  --color-on-error: #000000;
 
-    --color-background: #121218;
-    --color-surface: #1e1e2e;
-    --color-on-surface: #e8e8f0;
-    --color-surface-variant: #2a2a3c;
-    --color-surface-container-highest: #2a2a3c;
-    --color-text: #e8e8f0;
-    --color-text-secondary: #9ca3af;
-    /* Flutter's dark ColorScheme leaves outline unset → defaults to onSurface */
-    --color-outline: #e8e8f0;
-    --color-outline-variant: #3a3a4c;
+  --color-background: #121218;
+  --color-surface: #1e1e2e;
+  --color-on-surface: #e8e8f0;
+  --color-surface-variant: #2a2a3c;
+  --color-surface-container-highest: #2a2a3c;
+  --color-text: #e8e8f0;
+  --color-text-secondary: #9ca3af;
+  /* Flutter's dark ColorScheme leaves outline unset → defaults to onSurface */
+  --color-outline: #e8e8f0;
+  --color-outline-variant: #3a3a4c;
 
-    --color-card: #2a2a3c;
-    --color-card-border: rgb(255 255 255 / 0.08);
-    --color-input-fill: #2a2a3c;
-    --color-input-border: #3a3a4c;
-    --color-input-focus: #4de082;
-    --color-chip: #2a2a3c;
-    --color-divider: rgb(255 255 255 / 0.08);
-    --color-snackbar: #2a2a3c;
-    --color-on-snackbar: #e8e8f0;
-    --color-nav: #1e1e2e;
-    --color-nav-selected: #4de082;
-    --color-nav-unselected: #9ca3af;
-    --color-sheet-handle: rgb(255 255 255 / 0.15);
+  --color-card: #2a2a3c;
+  --color-card-border: rgb(255 255 255 / 0.08);
+  --color-input-fill: #2a2a3c;
+  --color-input-border: #3a3a4c;
+  --color-input-focus: #4de082;
+  --color-chip: #2a2a3c;
+  --color-divider: rgb(255 255 255 / 0.08);
+  --color-snackbar: #2a2a3c;
+  --color-on-snackbar: #e8e8f0;
+  --color-nav: #1e1e2e;
+  --color-nav-selected: #4de082;
+  --color-nav-unselected: #9ca3af;
+  --color-sheet-handle: rgb(255 255 255 / 0.15);
 
-    --gradient-theme-primary: var(--gradient-primary-dark);
-    --gradient-auth: linear-gradient(to bottom right, #0d1b0f, #0a1628);
+  --gradient-theme-primary: var(--gradient-primary-dark);
+  --gradient-auth: linear-gradient(to bottom right, #0d1b0f, #0a1628);
 
-    --shadow-glass: 0 8px 24px rgb(0 0 0 / 0.3);
-    --color-progress-track: rgb(255 255 255 / 0.08);
-    --color-ring-track-soft: rgb(255 255 255 / 0.06);
-    /* #BA1A1A is unreadable on the dark card; the dark error red keeps the meaning */
-    --color-over-target: #ff5252;
-    --color-meal-lunch: #adc6ff;
-    --color-food-tile: rgb(255 255 255 / 0.02);
-    --color-food-divider: rgb(255 255 255 / 0.06);
-    --color-food-chip: rgb(255 255 255 / 0.06);
-    --color-option-tile: rgb(255 255 255 / 0.04);
-    --color-option-tile-border: rgb(255 255 255 / 0.06);
-    --shadow-option-tile: 0 4px 12px rgb(0 0 0 / 0.15);
-    /* Flutter keeps white text on #4DE082 (≈1.6:1); Material's dark onPrimary is black. */
-    --color-on-theme-gradient: #000000;
-    --color-on-theme-gradient-muted: rgb(0 0 0 / 0.75);
-    --color-on-theme-gradient-chip: rgb(0 0 0 / 0.12);
-    --shadow-card-summary: 0 4px 12px rgb(0 0 0 / 0.08);
-    --shadow-card-soft: 0 2px 8px rgb(0 0 0 / 0.06);
-  }
+  --shadow-glass: 0 8px 24px rgb(0 0 0 / 0.3);
+  --color-progress-track: rgb(255 255 255 / 0.08);
+  --color-ring-track-soft: rgb(255 255 255 / 0.06);
+  /* #BA1A1A is unreadable on the dark card; the dark error red keeps the meaning */
+  --color-over-target: #ff5252;
+  --color-meal-lunch: #adc6ff;
+  --color-food-tile: rgb(255 255 255 / 0.02);
+  --color-food-divider: rgb(255 255 255 / 0.06);
+  --color-food-chip: rgb(255 255 255 / 0.06);
+  --color-option-tile: rgb(255 255 255 / 0.04);
+  --color-option-tile-border: rgb(255 255 255 / 0.06);
+  --shadow-option-tile: 0 4px 12px rgb(0 0 0 / 0.15);
+  /* Flutter keeps white text on #4DE082 (≈1.6:1); Material's dark onPrimary is black. */
+  --color-on-theme-gradient: #000000;
+  --color-on-theme-gradient-muted: rgb(0 0 0 / 0.75);
+  --color-on-theme-gradient-chip: rgb(0 0 0 / 0.12);
+  --shadow-card-summary: 0 4px 12px rgb(0 0 0 / 0.08);
+  --shadow-card-soft: 0 2px 8px rgb(0 0 0 / 0.06);
+
+  --color-chat-bubble: rgb(255 255 255 / 0.06);
+  --shadow-chat-bubble: 0 2px 8px rgb(0 0 0 / 0.15);
+  --color-quick-chip: rgb(255 255 255 / 0.06);
+  --color-composer-field: rgb(255 255 255 / 0.06);
+  --shadow-composer: 0 -4px 16px rgb(0 0 0 / 0.2);
+  --color-profile-field: rgb(255 255 255 / 0.04);
+  /* #BA1A1A on the dark card fails contrast; the dark error red keeps the meaning */
+  --color-allergy-chip: rgb(255 82 82 / 0.12);
+  --color-allergy-text: #ff8a80;
 }

@@ -40,10 +40,8 @@
   --glass-border-end: rgb(255 255 255 / 0.05);
 }
 
-@media (prefers-color-scheme: dark) {
-  .auto {
-    --glass-bg: rgb(255 255 255 / var(--glass-opacity, 0.12));
-    --glass-border-start: rgb(255 255 255 / 0.15);
-    --glass-border-end: rgb(255 255 255 / 0.05);
-  }
+:global([data-theme='dark']) .auto {
+  --glass-bg: rgb(255 255 255 / var(--glass-opacity, 0.12));
+  --glass-border-start: rgb(255 255 255 / 0.15);
+  --glass-border-end: rgb(255 255 255 / 0.05);
 }

@@ -1,10 +1,12 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { tabPaths } from '@/app/router/tabs';
 import { ErrorState, Spinner, StaggeredEntrance } from '@/components';
 import { useCurrentUser } from '@/features/auth';
+import type { CoachContextState } from '@/features/coach';
 import { getErrorMessage } from '@/lib/api';
-import type { DayLogsDto, FoodLogItemDto, MealType } from '@/types/api';
+import { notifyTargetReached } from '@/lib/notifications';
+import type { DayLogsDto, FoodLogDto, FoodLogItemDto, MealType } from '@/types/api';
 import { useDayLogs } from '../api/useFoodLogQueries';
 import { AddFoodSheet } from '../components/add-food/AddFoodSheet';
 import { AiAdviceSheet } from '../components/AiAdviceSheet';
@@ -12,10 +14,10 @@ import { CaloriesRemainingCard } from '../components/CaloriesRemainingCard';
 import { DayStrip } from '../components/DayStrip';
 import { FoodLogHeader } from '../components/FoodLogHeader';
 import { MealSection } from '../components/MealSection';
+import { ReminderPrompt } from '../components/ReminderPrompt';
 import { RemoveItemDialog } from '../components/RemoveItemDialog';
 import { useSelectedDay } from '../hooks/useSelectedDay';
 import { DEFAULT_DAILY_CALORIES, MEALS } from '../model/meals';
-import type { CoachContextState } from '../paths';
 import { useAdviceStore } from '../store/adviceStore';
 import styles from './FoodLogPage.module.css';
 
@@ -31,12 +33,18 @@ export function FoodLogPage() {
   const [removing, setRemoving] = useState<FoodLogItemDto | null>(null);
   const dailyCalories = user?.daily_calories_target ?? DEFAULT_DAILY_CALORIES;
   const consumed = dayLogs.data?.total_calories ?? 0;
+  const loadedToday = selectedDay === today && dayLogs.isSuccess;
+
+  useEffect(() => {
+    if (loadedToday) notifyTargetReached(consumed, dailyCalories, today);
+  }, [loadedToday, consumed, dailyCalories, today]);
 
   return (
     <main className={styles.page}>
       <FoodLogHeader fullName={user?.full_name} />
       <DayStrip today={today} selectedDay={selectedDay} onSelect={selectDay} />
       <CaloriesRemainingCard consumed={consumed} target={dailyCalories} />
+      {loadedToday && consumed > 0 && <ReminderPrompt />}
 
       {dayLogs.isPending ? (
         <div className={styles.status}>
@@ -96,9 +104,11 @@ function MealAdvice({ remainingCalories }: { remainingCalories: number }) {
   const lastSubmittedLog = useAdviceStore((state) => state.lastSubmittedLog);
   const clearAdvice = useAdviceStore((state) => state.clearAdvice);
 
-  const discussWithCoach = (advice: string) => {
+  const discussWithCoach = (log: FoodLogDto) => {
     clearAdvice();
-    const state: CoachContextState = { coachContext: advice };
+    const state: CoachContextState = {
+      coachContext: { foodLogId: log.id, advice: log.ai_advice ?? '' },
+    };
     void navigate(tabPaths.coach, { state });
   };
 

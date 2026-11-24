@@ -1,0 +1,76 @@
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.text {
+  flex: 1;
+  min-width: 0;
+}
+
+.label {
+  color: var(--color-on-surface);
+  font: 600 14px/1.4 var(--font-family);
+}
+
+.description {
+  margin-top: 2px;
+  color: var(--color-text-secondary);
+  font: var(--font-body-sm);
+}
+
+/* Material 3 switch: 52 × 32 track inside a 48px touch target */
+.switch {
+  position: relative;
+  flex: none;
+  width: 52px;
+  height: 32px;
+  margin: var(--space-2) 0;
+  padding: 0;
+  border: 2px solid var(--color-outline);
+  border-radius: var(--radius-full);
+  background: var(--color-surface-variant);
+  cursor: pointer;
+  transition:
+    background-color var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out);
+}
+
+.switch::before {
+  position: absolute;
+  inset: -10px -2px;
+  content: '';
+}
+
+.thumb {
+  position: absolute;
+  top: 50%;
+  left: 6px;
+  width: 16px;
+  height: 16px;
+  border-radius: var(--radius-full);
+  background: var(--color-outline);
+  transform: translateY(-50%);
+  transition:
+    left var(--duration-fast) var(--ease-smooth-decelerate),
+    width var(--duration-fast) var(--ease-smooth-decelerate),
+    height var(--duration-fast) var(--ease-smooth-decelerate);
+}
+
+.switch[aria-checked='true'] {
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+}
+
+.switch[aria-checked='true'] .thumb {
+  left: 22px;
+  width: 24px;
+  height: 24px;
+  background: var(--color-on-primary);
+}
+
+.switch:disabled {
+  cursor: default;
+  opacity: 0.38;
+}

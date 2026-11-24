@@ -6,6 +6,8 @@ import { useSessionStore } from '@/features/auth/store/sessionStore';
 import { useAdviceStore } from '@/features/food-log/store/adviceStore';
 import { useOnboardingStore } from '@/features/onboarding/store/onboardingStore';
 import { tokenStore } from '@/lib/api';
+import { useNotificationSettings } from '@/lib/notifications/notificationSettings';
+import { useThemeStore } from '@/lib/theme';
 import { server } from './server';
 
 // jsdom gaps. Reduced motion is "on" so JS animations (count-ups, chart bars) settle at once.
@@ -19,6 +21,7 @@ Object.defineProperty(window, 'matchMedia', {
   }),
 });
 window.scrollTo = () => {};
+Element.prototype.scrollTo = () => {};
 class ResizeObserverStub {
   observe() {}
   unobserve() {}
@@ -35,5 +38,8 @@ afterEach(() => {
   useSnackbarStore.setState({ current: null });
   useOnboardingStore.setState({ userId: null, drafts: null, completed: false });
   useAdviceStore.setState({ lastSubmittedLog: null });
+  useNotificationSettings.setState({ remindersEnabled: false, promptDismissed: false });
+  useThemeStore.setState({ preference: 'system' });
+  window.localStorage.clear();
 });
 afterAll(() => server.close());

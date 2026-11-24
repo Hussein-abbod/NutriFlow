@@ -41,10 +41,12 @@ describe('AiAdviceSheet', () => {
     expect(document.querySelector('img')).toBeNull();
   });
 
-  it('closes on "Got it!" and hands the advice to the coach', async () => {
+  it('closes on "Got it!" and hands the meal to the coach', async () => {
     const { user, onClose, onDiscussWithCoach } = renderSheet('Try oats tomorrow.');
     await user.click(screen.getByRole('button', { name: 'Discuss with Coach AI' }));
-    expect(onDiscussWithCoach).toHaveBeenCalledWith('Try oats tomorrow.');
+    expect(onDiscussWithCoach).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 7, ai_advice: 'Try oats tomorrow.' }),
+    );
     await user.click(screen.getByRole('button', { name: 'Got it!' }));
     expect(onClose).toHaveBeenCalled();
   });

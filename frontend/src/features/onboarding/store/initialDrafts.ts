@@ -1,7 +1,7 @@
 import type { UserDto } from '@/types/api';
-import { COMMON_ALLERGIES, DEFAULT_BASIC_INFO, DEFAULT_GOAL_PERIOD_WEEKS } from '../constants';
+import { DEFAULT_BASIC_INFO, DEFAULT_GOAL_PERIOD_WEEKS } from '../constants';
 import type { ActivityFormValues } from '../schemas/activitySchema';
-import type { AllergiesFormValues } from '../schemas/allergiesSchema';
+import { allergiesFormValuesFrom, type AllergiesFormValues } from '../schemas/allergiesSchema';
 import type { BasicInfoFormValues } from '../schemas/basicInfoSchema';
 import type { GoalFormValues } from '../schemas/goalSchema';
 import { GOAL_PERIOD_RANGE_WEEKS } from '../schemas/limits';
@@ -18,19 +18,6 @@ const oneDecimal = (value: number) => value.toFixed(1);
 
 const clampWeeks = (weeks: number) =>
   Math.min(GOAL_PERIOD_RANGE_WEEKS.max, Math.max(GOAL_PERIOD_RANGE_WEEKS.min, Math.round(weeks)));
-
-function allergyDraft(saved: readonly string[]): AllergiesFormValues {
-  const selected: AllergiesFormValues['selected'] = [];
-  const other: string[] = [];
-  for (const name of saved) {
-    const known = COMMON_ALLERGIES.find(
-      (allergy) => allergy.value.toLowerCase() === name.toLowerCase(),
-    );
-    if (known) selected.push(known.value);
-    else other.push(name);
-  }
-  return { selected, none: false, other: other.join(', ') };
-}
 
 /**
  * Flutter starts every step from fixed defaults; here we prefill anything the user already
@@ -52,6 +39,6 @@ export function initialDraftsFor(user: UserDto): OnboardingDrafts {
         isWeightGoal && user.goal_weight_kg !== null ? oneDecimal(user.goal_weight_kg) : '',
       periodWeeks: clampWeeks(user.goal_period_weeks ?? DEFAULT_GOAL_PERIOD_WEEKS),
     },
-    allergies: allergyDraft(user.food_allergies ?? []),
+    allergies: allergiesFormValuesFrom(user.food_allergies ?? []),
   };
 }

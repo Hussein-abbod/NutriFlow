@@ -19,3 +19,6 @@ export function resolveApiBaseUrl(rawValue: string | undefined): string {
 export const API_BASE_URL = resolveApiBaseUrl(import.meta.env.VITE_API_BASE_URL);
 
 export const REQUEST_TIMEOUT_MS = 20_000;
+
+/** Endpoints that wait on Groq / Gemini (photo recognition, meal advice, coach) can be slow. */
+export const AI_REQUEST_TIMEOUT_MS = 60_000;

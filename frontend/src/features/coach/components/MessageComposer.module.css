@@ -1,0 +1,80 @@
+/* surface bar with an upward shadow; padding 16 × 12 */
+.composer {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-composer);
+}
+
+.fieldWrap {
+  flex: 1;
+  min-width: 0;
+}
+
+/* filled pill (#F5F7FA / white 6 %), radius 24, padding 20 × 12 */
+.field {
+  display: block;
+  width: 100%;
+  min-height: 44px;
+  max-height: 140px;
+  padding: 11px var(--space-5);
+  border: 1px solid transparent;
+  border-radius: var(--space-6);
+  background: var(--color-composer-field);
+  color: var(--color-on-surface);
+  font: 400 14px/1.5 var(--font-family);
+  resize: none;
+  field-sizing: content;
+}
+
+.field::placeholder {
+  color: var(--color-text-secondary);
+  opacity: 1;
+}
+
+.field:focus-visible {
+  border-color: var(--color-primary);
+  outline: none;
+}
+
+.field[aria-invalid='true'] {
+  border-color: var(--color-error);
+}
+
+.error,
+.counter {
+  padding: var(--space-1) var(--space-5) 0;
+  font: var(--font-body-sm);
+}
+
+.error {
+  color: var(--color-error);
+}
+
+.counter {
+  color: var(--color-text-secondary);
+  text-align: right;
+}
+
+/* padding 12, radius 16, primary; grey 30 % while the coach is answering */
+.send {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: var(--radius-button);
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+  cursor: pointer;
+  transition: background-color 250ms var(--ease-out);
+}
+
+.send:disabled {
+  background: color-mix(in srgb, var(--color-text-secondary) 30%, transparent);
+  color: var(--color-text-secondary);
+  cursor: default;
+}

@@ -1,0 +1,31 @@
+.empty {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-6);
+  text-align: center;
+}
+
+.badge {
+  display: grid;
+  place-items: center;
+  margin-bottom: var(--space-4);
+  padding: var(--space-5);
+  border-radius: var(--radius-full);
+  background: color-mix(in srgb, var(--color-primary) 8%, transparent);
+  color: color-mix(in srgb, var(--color-primary) 40%, transparent);
+}
+
+.title {
+  color: var(--color-text-secondary);
+  font: 500 14px/1.5 var(--font-family);
+}
+
+/* Flutter uses 60 % of the secondary colour, which fails 4.5:1; full secondary passes. */
+.message {
+  margin-top: var(--space-1);
+  color: var(--color-text-secondary);
+  font: 400 13px/1.4 var(--font-family);
+}

@@ -15,7 +15,7 @@ export function FoodLogHeader({ fullName }: { fullName: string | null | undefine
           NutriFlow<span className="visually-hidden"> food log</span>
         </h1>
       </div>
-      {/* Notifications arrive with the profile tab (session 4); Flutter's button did nothing. */}
+      {/* Decorative, as in Flutter (its button did nothing); reminders are set in Profile. */}
       <Icon name="notificationsOutlined" className={styles.bell} />
     </header>
   );

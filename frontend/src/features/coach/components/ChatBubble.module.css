@@ -1,0 +1,48 @@
+.row {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-2);
+  padding-bottom: var(--space-3);
+  animation: bubble-in var(--duration-normal) var(--ease-smooth-decelerate) both;
+}
+
+.user {
+  --bubble-from: 20px;
+  justify-content: flex-end;
+}
+
+.coach {
+  --bubble-from: -20px;
+  justify-content: flex-start;
+}
+
+@keyframes bubble-in {
+  from {
+    opacity: 0;
+    transform: translateX(var(--bubble-from));
+  }
+}
+
+/* radius 18 with the corner next to the avatar at 4; soft drop shadow */
+.bubble {
+  min-width: 0;
+  max-width: min(85%, 560px);
+  padding: var(--space-3) var(--space-4);
+  border-radius: 18px;
+  box-shadow: var(--shadow-chat-bubble);
+  font: 400 14px/1.5 var(--font-family);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.user .bubble {
+  border-bottom-right-radius: var(--space-1);
+  background: var(--gradient-theme-primary);
+  color: var(--color-on-theme-gradient);
+}
+
+.coach .bubble {
+  border-bottom-left-radius: var(--space-1);
+  background: var(--color-chat-bubble);
+  color: var(--color-on-surface);
+}

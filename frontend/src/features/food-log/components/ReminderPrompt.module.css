@@ -1,0 +1,45 @@
+.prompt {
+  display: flex;
+  gap: var(--space-3);
+  margin: 0 var(--space-5) var(--space-3);
+  padding: var(--space-4);
+  border: 1px solid var(--color-card-border);
+  border-radius: var(--radius-card);
+  background: var(--color-card);
+  box-shadow: var(--shadow-card-soft);
+}
+
+.icon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-chip);
+  background: color-mix(in srgb, var(--color-primary) 10%, transparent);
+  color: var(--color-primary);
+}
+
+.text {
+  flex: 1;
+  min-width: 0;
+}
+
+.title {
+  color: var(--color-on-surface);
+  font: var(--font-title-sm);
+}
+
+.body {
+  margin-top: 2px;
+  color: var(--color-text-secondary);
+  font: var(--font-body-sm);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}

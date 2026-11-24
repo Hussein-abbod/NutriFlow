@@ -1,0 +1,43 @@
+.row {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-2);
+  padding-bottom: var(--space-3);
+}
+
+.bubble {
+  display: flex;
+  gap: 5px;
+  padding: 14px var(--space-4);
+  border-radius: 18px 18px 18px var(--space-1);
+  background: var(--color-chat-bubble);
+}
+
+/* NutriFlowTheme.purple at 50 %, opacity 0 ↔ 1 */
+.dot {
+  width: 7px;
+  height: 7px;
+  border-radius: var(--radius-full);
+  background: color-mix(in srgb, var(--brand-purple) 50%, transparent);
+  animation: dot-fade 600ms var(--ease-in-out) infinite alternate both;
+}
+
+.dot:nth-child(3) {
+  animation-delay: 200ms;
+}
+
+.dot:nth-child(4) {
+  animation-delay: 400ms;
+}
+
+@keyframes dot-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dot {
+    animation: none;
+  }
+}

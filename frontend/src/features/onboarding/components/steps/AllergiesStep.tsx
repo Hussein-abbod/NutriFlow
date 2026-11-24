@@ -1,10 +1,9 @@
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useController, useForm } from 'react-hook-form';
 import { Icon, TextField } from '@/components';
 import { cn } from '@/lib/utils/cn';
-import { COMMON_ALLERGIES, STEP, stepFormId, type CommonAllergy } from '../../constants';
+import { COMMON_ALLERGIES, STEP, stepFormId } from '../../constants';
+import { useAllergiesForm } from '../../hooks/useAllergiesForm';
 import { useDraftSync } from '../../hooks/useDraftSync';
-import { allergiesSchema, type AllergiesFormValues } from '../../schemas/allergiesSchema';
+import type { AllergiesFormValues } from '../../schemas/allergiesSchema';
 import { ChoiceTile } from '../ChoiceTile';
 import { StepHeader } from '../StepHeader';
 import styles from './AllergiesStep.module.css';
@@ -19,38 +18,14 @@ export interface AllergiesStepProps {
 
 /** step_allergies.dart: common allergy chips, "None", and an optional free-text field. */
 export function AllergiesStep({ defaultValues, onDraftChange, onSubmit }: AllergiesStepProps) {
-  const form = useForm<AllergiesFormValues, unknown, string[]>({
-    resolver: zodResolver(allergiesSchema),
-    defaultValues,
-  });
+  const { form, isNone, isSelected, toggleAllergy, toggleNone, selectedName, noneField } =
+    useAllergiesForm(defaultValues);
   const {
     register,
-    control,
-    setValue,
     handleSubmit,
     formState: { errors },
   } = form;
   useDraftSync(form, onDraftChange);
-  const selected = useController({ control, name: 'selected' });
-  const none = useController({ control, name: 'none' });
-  const isNone = none.field.value;
-
-  const toggleAllergy = (allergy: CommonAllergy) => {
-    const current = selected.field.value;
-    selected.field.onChange(
-      current.includes(allergy)
-        ? current.filter((name) => name !== allergy)
-        : [...current, allergy],
-    );
-  };
-
-  const toggleNone = () => {
-    if (!isNone) {
-      setValue('selected', []);
-      setValue('other', '');
-    }
-    none.field.onChange(!isNone);
-  };
 
   return (
     <form
@@ -70,13 +45,13 @@ export function AllergiesStep({ defaultValues, onDraftChange, onSubmit }: Allerg
         <legend className="visually-hidden">Common allergies</legend>
         <div className={styles.chips}>
           {COMMON_ALLERGIES.map((allergy) => {
-            const checked = selected.field.value.includes(allergy.value);
+            const checked = isSelected(allergy.value);
             return (
               <ChoiceTile
                 key={allergy.value}
                 type="checkbox"
                 layout="chip"
-                name={selected.field.name}
+                name={selectedName}
                 value={allergy.value}
                 checked={checked}
                 selected={checked}
@@ -98,11 +73,11 @@ export function AllergiesStep({ defaultValues, onDraftChange, onSubmit }: Allerg
         className={styles.none}
         type="checkbox"
         layout="toggle"
-        name={none.field.name}
+        name={noneField.name}
         checked={isNone}
         selected={isNone}
         onChange={toggleNone}
-        onBlur={none.field.onBlur}
+        onBlur={noneField.onBlur}
       >
         <Icon name="checkCircleOutline" size={18} />
         <span className={cn(styles.chipLabel, isNone && stepStyles.selectedText)}>None</span>

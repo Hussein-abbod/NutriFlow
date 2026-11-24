@@ -58,3 +58,17 @@ export const allergiesSchema = z
   });
 
 export type AllergiesFormValues = z.input<typeof allergiesSchema>;
+
+/** The form values for a saved allergy list: common ones as chips, the rest as free text. */
+export function allergiesFormValuesFrom(saved: readonly string[]): AllergiesFormValues {
+  const selected: AllergiesFormValues['selected'] = [];
+  const other: string[] = [];
+  for (const name of saved) {
+    const known = COMMON_ALLERGIES.find(
+      (allergy) => allergy.value.toLowerCase() === name.toLowerCase(),
+    );
+    if (known) selected.push(known.value);
+    else other.push(name);
+  }
+  return { selected, none: false, other: other.join(', ') };
+}

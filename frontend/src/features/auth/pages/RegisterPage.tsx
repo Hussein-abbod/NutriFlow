@@ -16,6 +16,7 @@ import {
   type RegisterFormOutput,
   type RegisterFormValues,
 } from '../schemas/registerSchema';
+import { PASSWORD_RULES_HINT } from '../schemas/fieldRules';
 import styles from './AuthScreen.module.css';
 
 const ENTRANCE = { total: 3, controllerMs: 900 } as const;
@@ -101,6 +102,7 @@ export function RegisterPage() {
                   variant="glass"
                   label="Password"
                   autoComplete="new-password"
+                  helperText={PASSWORD_RULES_HINT}
                   error={errors.password?.message}
                   {...register('password')}
                 />

@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { delay, http, HttpResponse } from 'msw';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { sessionHandlers } from '@/test/authHandlers';
+import { coachServer } from '@/test/coachHandlers';
 import { buildDayLogs, buildFoodLog, buildLogItem, buildUser, TEST_API } from '@/test/fixtures';
 import { foodLogHandlers } from '@/test/foodLogHandlers';
 import { renderApp } from '@/test/renderApp';
@@ -220,16 +221,22 @@ describe('FoodLogPage', () => {
     expect(useAdviceStore.getState().lastSubmittedLog).toBeNull();
   });
 
-  it('takes the advice to the coach tab', async () => {
+  it('takes the meal to the coach, which starts the chat about its advice', async () => {
     const userEvents = userEvent.setup();
+    const coach = coachServer([], {
+      adviceByLogId: { 1: 'Great start! Add some protein at lunch.' },
+    });
+    server.use(...coach.handlers);
     act(() => useAdviceStore.getState().setLastSubmittedLog(breakfast));
     const { router } = renderFoodLog();
 
     await userEvents.click(await screen.findByRole('button', { name: 'Discuss with Coach AI' }));
     expect(router.state.location.pathname).toBe('/coach');
-    expect(router.state.location.state).toEqual({
-      coachContext: 'Great start! Add some protein at lunch.',
-    });
+    const conversation = await screen.findByRole('list', { name: 'Conversation with Coach AI' });
+    expect(conversation).toHaveTextContent('Great start! Add some protein at lunch.');
+    expect(await within(conversation).findByText('Happy to talk about this meal.')).toBeVisible();
+    expect(coach.requests).toEqual([{ food_log_id: 1 }]);
+    expect(router.state.location.state).toBeNull(); // a reload does not ask again
   });
 
   it('falls back to today for an invalid date in the URL', async () => {

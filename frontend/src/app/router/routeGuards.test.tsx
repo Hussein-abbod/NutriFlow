@@ -4,6 +4,7 @@ import { http, HttpResponse } from 'msw';
 import { describe, expect, it } from 'vitest';
 import { tokenStore } from '@/lib/api';
 import { sessionHandlers } from '@/test/authHandlers';
+import { coachServer } from '@/test/coachHandlers';
 import { buildUser, TEST_API } from '@/test/fixtures';
 import { foodLogHandlers } from '@/test/foodLogHandlers';
 import { renderApp } from '@/test/renderApp';
@@ -57,14 +58,14 @@ describe('splash + route guards', () => {
       }),
     );
     const { router } = renderApp('/profile');
-    await userEvent.click(await screen.findByRole('button', { name: 'Log out' }));
+    await userEvent.click(await screen.findByRole('button', { name: 'Logout' }));
     await waitFor(() => expect(router.state.location.pathname).toBe('/login'));
     expect(logoutCalls).toBe(1);
     expect(tokenStore.getAccessToken()).toBeNull();
   });
 
   it('redirects to login with a message when the session expires', async () => {
-    server.use(...sessionHandlers(onboardedUser));
+    server.use(...sessionHandlers(onboardedUser), ...coachServer().handlers);
     const { router } = renderApp('/coach');
     await screen.findByRole('heading', { name: 'Coach AI' });
     act(() => tokenStore.notifySessionExpired());

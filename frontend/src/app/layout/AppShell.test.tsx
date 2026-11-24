@@ -2,6 +2,7 @@ import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { sessionHandlers } from '@/test/authHandlers';
+import { coachServer } from '@/test/coachHandlers';
 import { dashboardHandlers } from '@/test/dashboardHandlers';
 import { buildUser } from '@/test/fixtures';
 import { foodLogHandlers } from '@/test/foodLogHandlers';
@@ -35,6 +36,7 @@ describe('AppShell bottom navigation', () => {
       ...sessionHandlers(buildUser({ is_profile_complete: true })),
       ...dashboardHandlers(),
       ...foodLogHandlers(),
+      ...coachServer().handlers,
     );
     const user = userEvent.setup();
     const { router } = renderApp('/food-log');
@@ -49,6 +51,6 @@ describe('AppShell bottom navigation', () => {
     expect(await screen.findByRole('heading', { name: "Today's Overview" })).toBeInTheDocument();
 
     await user.click(screen.getByRole('link', { name: 'Profile' }));
-    expect(await screen.findByRole('button', { name: 'Log out' })).toBeInTheDocument();
+    expect(await screen.findByRole('button', { name: 'Logout' })).toBeInTheDocument();
   });
 });

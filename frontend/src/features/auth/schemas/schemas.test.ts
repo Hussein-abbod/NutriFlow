@@ -39,8 +39,20 @@ describe('registerSchema', () => {
     [{ email: '' }, 'Required'],
     [{ email: 'alice' }, 'Invalid email'],
     [{ password: 'short', confirmPassword: 'short' }, 'Min 8 characters'],
-    [{ password: 'x'.repeat(73), confirmPassword: 'x'.repeat(73) }, 'Max 72 characters'],
-    [{ password: 'é'.repeat(40), confirmPassword: 'é'.repeat(40) }, 'Password is too long'],
+    [{ password: 'x1'.repeat(37), confirmPassword: 'x1'.repeat(37) }, 'Max 72 characters'],
+    [{ password: 'é1'.repeat(25), confirmPassword: 'é1'.repeat(25) }, 'Password is too long'],
+    [
+      { password: 'password', confirmPassword: 'password' },
+      'Use at least one letter and one number',
+    ],
+    [
+      { password: '12345678', confirmPassword: '12345678' },
+      'Use at least one letter and one number',
+    ],
+    [
+      { password: ' Str0ngPass', confirmPassword: ' Str0ngPass' },
+      'Remove the space at the start or end',
+    ],
     [{ confirmPassword: 'different' }, 'Passwords do not match'],
   ])('rejects %o', (override, message) => {
     expect(firstError(registerSchema.safeParse({ ...valid, ...override }))).toBe(message);

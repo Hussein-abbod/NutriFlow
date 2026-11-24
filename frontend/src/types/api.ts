@@ -260,3 +260,41 @@ export interface DayLogsDto {
 export interface MessageDto {
   message: string;
 }
+
+/** backend: schemas.user.ProfileUpdateRequest (PUT /users/profile, partial) */
+export interface ProfileUpdateRequestDto {
+  full_name?: string;
+  age?: number;
+  height_cm?: number;
+  weight_kg?: number;
+}
+
+/** backend: schemas.user.PasswordChangeRequest */
+export interface PasswordChangeRequestDto {
+  current_password: string;
+  new_password: string;
+}
+
+/** backend: schemas.user.PasswordChangeOut — other sessions end; this one gets new tokens. */
+export interface PasswordChangeResponseDto extends TokenResponseDto {
+  message: string;
+}
+
+/** backend: schemas.user.AllergiesOut */
+export interface AllergiesResponseDto {
+  message: string;
+  allergies: string[];
+}
+
+export type CoachRole = 'user' | 'assistant';
+
+/** backend: schemas.coach.CoachMessageOut */
+export interface CoachMessageDto {
+  id: number;
+  role: CoachRole;
+  content: string;
+  created_at: string;
+}
+
+/** backend: schemas.coach.CoachMessageRequest — a message, or a logged meal to discuss. */
+export type CoachMessageRequestDto = { message: string } | { food_log_id: number };

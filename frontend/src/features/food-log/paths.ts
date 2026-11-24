@@ -29,14 +29,6 @@ export function foodLogUrl(day: string, today: string): string {
   return day === today ? foodLogPaths.log : `${foodLogPaths.log}?date=${day}`;
 }
 
-/**
- * Router state for "Discuss with Coach AI" (Flutter `HomeScreen.switchTab(2, coachContext)`).
- * The coach tab (session 4) reads it to start the chat about this advice.
- */
-export interface CoachContextState {
-  coachContext: string;
-}
-
 /** Router state set when an add-food screen is opened from the food log. */
 export interface OpenedFromLogState {
   fromFoodLog: true;

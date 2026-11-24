@@ -1,10 +1,10 @@
 import { Navigate, type RouteObject } from 'react-router';
 import { LoginPage, paths, RegisterPage } from '@/features/auth';
+import { CoachPage } from '@/features/coach';
 import { FoodLogPage, foodLogPaths } from '@/features/food-log';
 import { OnboardingPage } from '@/features/onboarding';
+import { ProfilePage } from '@/features/profile';
 import { AppShell } from '../layout/AppShell';
-import { CoachPlaceholderPage } from '../placeholders/CoachPlaceholderPage';
-import { ProfilePlaceholderPage } from '../placeholders/ProfilePlaceholderPage';
 import { RootLayout } from './RootLayout';
 import { RootRedirect } from './RootRedirect';
 import { RouteGate } from './RouteGate';
@@ -48,8 +48,8 @@ export function createAppRoutes({ splashMinDurationMs }: AppRouteOptions = {}): 
                     Component: (await import('@/features/dashboard')).DashboardPage,
                   }),
                 },
-                { path: tabPaths.coach, element: <CoachPlaceholderPage /> },
-                { path: tabPaths.profile, element: <ProfilePlaceholderPage /> },
+                { path: tabPaths.coach, element: <CoachPage /> },
+                { path: tabPaths.profile, element: <ProfilePage /> },
               ],
             },
             // Screens Flutter pushes over the tabs (full screen, no bottom nav), lazy-loaded.
